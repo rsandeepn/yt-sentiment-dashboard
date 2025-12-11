@@ -1,4 +1,3 @@
-// src/components/Dashboard.jsx
 import { useState } from "react";
 import axios from "axios";
 import {
@@ -9,8 +8,6 @@ import {
   Button,
   CircularProgress,
   Divider,
-  Chip,
-  Grid,
 } from "@mui/material";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -19,8 +16,8 @@ import { useAnalysis } from "../context/AnalysisContext";
 
 import StatsCharts from "./StatsCharts";
 import SummaryCard from "./summary/SummaryCard";
-import { parseSummary } from "../utils/parseSummary";
-import SuggestionCard from "./summary/SuggestionCard";
+import ExploreComments from "./ExploreComments";
+import Suggestioncard from "./summary/SuggestionCard";
 
 export default function Dashboard() {
   const [url, setUrl] = useState("");
@@ -48,130 +45,171 @@ export default function Dashboard() {
       setResult(res.data);
     } catch (err) {
       console.error(err);
-      setError("Failed to analyze video. Try again.");
+      setError("Failed to analyze video.");
     } finally {
       setLoading(false);
     }
   };
 
   // -----------------------------------------
-  // EXPORT PDF
+  // PDF EXPORT
   // -----------------------------------------
   const exportPDF = async () => {
     const section = document.getElementById("report-section");
     if (!section) return;
 
     const canvas = await html2canvas(section, { scale: 2 });
-    const imgData = canvas.toDataURL("image/png");
+    const img = canvas.toDataURL("image/png");
 
     const pdf = new jsPDF("p", "mm", "a4");
     const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-
     const imgWidth = pageWidth;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    // First page
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-
-    // Additional pages
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-
+    pdf.addImage(img, "PNG", 0, 0, imgWidth, imgHeight);
     pdf.save("youtube-summary-report.pdf");
   };
 
-  // -----------------------------------------
-  // PARSE DETAILED SUMMARY INTO UI SECTIONS
-  // -----------------------------------------
-  const summarySections = result ? parseSummary(result.summary) : {};
-
   return (
-    <Box p={4}>
-      {/* HEADER */}
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
-        🎬 YouTube Sentiment Dashboard
-      </Typography>
+    <Box
+      p={4}
+      sx={{
+        background: "linear-gradient(135deg, #eef1ff 0%, #ffffff 100%)",
+        minHeight: "100vh",
+      }}
+    >
+      {/* -----------------------------------------
+          HEADER SECTION
+      ------------------------------------------ */}
+      <Box textAlign="center" mb={4}>
+        <Typography variant="h3" fontWeight="800" gutterBottom>
+          🎬 YouTube Sentiment Dashboard
+        </Typography>
 
-      <Typography color="text.secondary" mb={3}>
-        Analyze multilingual YouTube comments (English, Spanish, Telugu, Hindi,
-        Tamil, etc.)
-      </Typography>
+        <Typography
+          color="text.secondary"
+          sx={{ maxWidth: "800px", mx: "auto", fontSize: "1.1rem" }}
+        >
+          Analyze multilingual YouTube comments powered by sentiment clustering.
+        </Typography>
+      </Box>
 
-      {/* URL INPUT */}
-      <Paper sx={{ p: 3, mb: 4, borderRadius: 3 }}>
-        <Typography variant="subtitle1" fontWeight="600">
-          Enter YouTube URL
+      {/* -----------------------------------------
+          PREMIUM URL INPUT CARD
+      ------------------------------------------ */}
+      <Paper
+        sx={{
+          p: 4,
+          mb: 5,
+          borderRadius: 4,
+          backdropFilter: "blur(12px)",
+          background: "rgba(255,255,255,0.6)",
+          boxShadow: "0 8px 25px rgba(0,0,0,0.08)",
+        }}
+      >
+        <Typography
+          variant="h6"
+          fontWeight="700"
+          sx={{ textAlign: "center", mb: 2 }}
+        >
+          🔗 Enter YouTube Video URL
         </Typography>
 
         <Box
           mt={2}
           display="flex"
           gap={2}
+          justifyContent="center"
           flexDirection={{ xs: "column", sm: "row" }}
         >
           <TextField
             fullWidth
-            label="https://youtube.com/..."
+            placeholder="https://youtube.com/..."
             value={url}
             onChange={(e) => setUrl(e.target.value)}
+            sx={{
+              maxWidth: 700,
+              mx: "auto",
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "12px",
+              },
+            }}
           />
 
           <Button
             variant="contained"
             disabled={loading}
             onClick={analyzeVideo}
-            sx={{ minWidth: 140 }}
+            sx={{
+              px: 4,
+              borderRadius: "12px",
+              fontSize: "1rem",
+              fontWeight: "bold",
+            }}
           >
             {loading ? <CircularProgress size={22} /> : "Analyze"}
           </Button>
         </Box>
 
         {error && (
-          <Typography mt={2} color="error">
+          <Typography mt={2} color="error" textAlign="center">
             {error}
           </Typography>
         )}
       </Paper>
 
-      {/* ---------------------------------------------------
-         RESULTS SECTION
-      ---------------------------------------------------- */}
+      {/* -----------------------------------------
+          RESULTS
+      ------------------------------------------ */}
       {result && (
-        <Paper sx={{ p: 3, borderRadius: 3 }}>
+        <Paper
+          sx={{
+            p: 4,
+            borderRadius: 4,
+            backdropFilter: "blur(10px)",
+            background: "rgba(255,255,255,0.7)",
+            boxShadow: "0 8px 25px rgba(0,0,0,0.08)",
+          }}
+        >
           {/* ACTION BUTTONS */}
-          <Box display="flex" justifyContent="flex-end" gap={2} mb={2}>
-            <Button variant="contained" color="secondary" onClick={exportPDF}>
-              📄 Export PDF
+          <Box display="flex" justifyContent="flex-end" gap={2} mb={3}>
+            {/* <Button
+              variant="outlined"
+              onClick={() => navigate("/themes")}
+              sx={{
+                borderRadius: "10px",
+                fontWeight: "600",
+                px: 3,
+              }}
+            >
+              🎯 View Themes
+            </Button> */}
+
+            <Button
+              variant="outlined"
+              onClick={() => navigate("/clusters")}
+              sx={{
+                borderRadius: "10px",
+                fontWeight: "600",
+                px: 3,
+              }}
+            >
+              🧩 View Clusters
             </Button>
 
             <Button
               variant="contained"
-              color="primary"
-              onClick={() => navigate("/explore")}
+              color="secondary"
+              onClick={exportPDF}
+              sx={{ borderRadius: "10px", fontWeight: "700", px: 3 }}
             >
-              🔍 Explore Comments
+              📄 Export PDF
             </Button>
           </Box>
 
           <div id="report-section">
             {/* -----------------------------------------
-               SIMPLE OVERVIEW (ALREADY GOOD)
-            ------------------------------------------ */}
-            <SummaryCard title="Simple Overview" icon="🧾" color="#4b7bec">
-              {result.overview}
-            </SummaryCard>
-
-            {/* -----------------------------------------
-               HIGH-LEVEL SUMMARY
+                SIMPLE OVERVIEW (PREMIUM LOOK)
             ------------------------------------------ */}
             <SummaryCard
               title="High-Level Summary"
@@ -201,128 +239,43 @@ export default function Dashboard() {
                 text: "",
               }}
             />
+            <SummaryCard title="Simple Overview" icon="🧾" color="#4b7bec">
+              {result.overview}
+            </SummaryCard>
 
+            <Divider sx={{ my: 4 }} />
+
+            {/* -----------------------------------------
+                STATS CHARTS
+            ------------------------------------------ */}
+            {/* <StatsCharts stats={result.stats} /> */}
+
+            {/* ⭐ VIEWER SUGGESTIONS (Premium UI Added Back) */}
             {result?.suggestions && (
-              <SuggestionCard suggestions={result.suggestions} />
+              <Suggestioncard suggestions={result.suggestions} />
             )}
-
+            <Divider sx={{ my: 4 }} />
             {/* -----------------------------------------
-               POSITIVE THEMES
+                EXPLORE COMMENTS (PREMIUM)
             ------------------------------------------ */}
-            {/* {summarySections.positives && (
-              <SummaryCard title="Positive Themes" icon="⭐" color="#20bf6b">
-                {summarySections.positives}
-              </SummaryCard>
-            )} */}
+            <Paper
+              sx={{
+                p: 3,
+                borderRadius: 3,
+                background: "rgba(245,245,255,0.6)",
+                boxShadow: "0 4px 18px rgba(0,0,0,0.06)",
+              }}
+            >
+              <Typography variant="h5" fontWeight="700" gutterBottom>
+                🔍 Explore Viewer Comments
+              </Typography>
 
-            {/* -----------------------------------------
-               NEGATIVE THEMES
-            ------------------------------------------ */}
-            {/* {summarySections.negatives && (
-              <SummaryCard title="Negative Themes" icon="⚠️" color="#eb3b5a">
-                {summarySections.negatives}
-              </SummaryCard>
-            )} */}
+              <Typography color="text.secondary" sx={{ mb: 2 }}>
+                Search, filter and navigate through all viewer reactions.
+              </Typography>
 
-            {/* -----------------------------------------
-               NEUTRAL OBSERVATIONS
-            ------------------------------------------ */}
-            {/* {summarySections.neutral && (
-              <SummaryCard
-                title="Neutral Observations"
-                icon="😐"
-                color="#a5b1c2"
-              >
-                {summarySections.neutral}
-              </SummaryCard>
-            )} */}
-
-            <Divider sx={{ my: 3 }} />
-
-            {/* -----------------------------------------
-               STATS + CHARTS
-            ------------------------------------------ */}
-            <StatsCharts stats={result.stats} />
-
-            <Divider sx={{ my: 3 }} />
-
-            {/* ---------------------------------------------------
-               CLUSTER SECTIONS
-            ---------------------------------------------------- */}
-            <Typography variant="h5" fontWeight="bold" mb={2}>
-              Comment Themes
-            </Typography>
-
-            <Grid container spacing={3}>
-              {/* POSITIVE CLUSTERS */}
-              <Grid item xs={12} md={6}>
-                <Typography variant="h6" gutterBottom>
-                  ⭐ Positive Clusters
-                </Typography>
-
-                {Object.entries(result.positive_clusters).map(([id, c]) => (
-                  <Paper
-                    key={id}
-                    sx={{
-                      p: 2,
-                      mb: 2,
-                      borderRadius: 3,
-                      background: "#e8f9f1",
-                    }}
-                  >
-                    <Chip
-                      label={`Cluster #${id}`}
-                      color="success"
-                      size="small"
-                      sx={{ mb: 1 }}
-                    />
-                    <Typography fontWeight="600">{c.summary}</Typography>
-                    <ul>
-                      {c.examples.map((ex, idx) => (
-                        <li key={idx}>
-                          <Typography variant="body2">{ex}</Typography>
-                        </li>
-                      ))}
-                    </ul>
-                  </Paper>
-                ))}
-              </Grid>
-
-              {/* NEGATIVE CLUSTERS */}
-              <Grid item xs={12} md={6}>
-                <Typography variant="h6" gutterBottom>
-                  ⚠️ Negative Clusters
-                </Typography>
-
-                {Object.entries(result.negative_clusters).map(([id, c]) => (
-                  <Paper
-                    key={id}
-                    sx={{
-                      p: 2,
-                      mb: 2,
-                      borderRadius: 3,
-                      background: "#ffeaea",
-                    }}
-                  >
-                    <Chip
-                      label={`Cluster #${id}`}
-                      color="error"
-                      size="small"
-                      sx={{ mb: 1 }}
-                    />
-                    <Typography fontWeight="600">{c.summary}</Typography>
-                    <ul>
-                      {c.examples.map((ex, idx) => (
-                        <li key={idx}>
-                          <Typography variant="body2">{ex}</Typography>
-                        </li>
-                      ))}
-                    </ul>
-                  </Paper>
-                ))}
-              </Grid>
-              {result.themes && <ThemeCard themes={result.themes} />}
-            </Grid>
+              <ExploreComments />
+            </Paper>
           </div>
         </Paper>
       )}
