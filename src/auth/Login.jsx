@@ -8,17 +8,24 @@ import {
   CardContent,
   Typography,
   Box,
+  Alert,
 } from "@mui/material";
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    const ok = login(form.email, form.password);
-    if (ok) navigate("/");
+    setError("");
+    setLoading(true);
+    const result = await login(form.email, form.password);
+    setLoading(false);
+    if (result.success) navigate("/");
+    else setError(result.message);
   };
 
   return (
@@ -34,9 +41,13 @@ export default function Login() {
             Login
           </Typography>
 
+          {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
+
           <form onSubmit={submit}>
             <TextField
               label="Email"
+              type="email"
+              required
               fullWidth
               margin="normal"
               value={form.email}
@@ -46,14 +57,16 @@ export default function Login() {
             <TextField
               label="Password"
               type="password"
+              required
+              inputProps={{ minLength: 8 }}
               fullWidth
               margin="normal"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
 
-            <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
-              Sign In
+            <Button type="submit" variant="contained" fullWidth disabled={loading} sx={{ mt: 2 }}>
+              {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
 

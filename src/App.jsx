@@ -6,6 +6,7 @@ import Register from "./auth/Register";
 import Dashboard from "./components/Dashboard";
 import ThemePage from "./components/ThemePage";
 import ClustersPage from "./components/ClustersPage";
+import HistoryPage from "./components/HistoryPage";
 
 export default function App() {
   return (
@@ -37,6 +38,15 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ClustersPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                <HistoryPage />
               </ProtectedRoute>
             }
           />

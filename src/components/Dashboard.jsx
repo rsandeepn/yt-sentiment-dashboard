@@ -1,5 +1,4 @@
 import { useState } from "react";
-import axios from "axios";
 import {
   Box,
   Paper,
@@ -13,14 +12,12 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { useNavigate } from "react-router-dom";
 import { useAnalysis } from "../context/useAnalysis";
+import { useAuth } from "../context/authContext";
+import api from "../api";
 
 import SummaryCard from "./summary/SummaryCard";
 import ExploreComments from "./ExploreComments";
 import Suggestioncard from "./summary/SuggestionCard";
-
-const API_BASE_URL = (
-  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000"
-).replace(/\/$/, "");
 
 export default function Dashboard() {
   const [url, setUrl] = useState("");
@@ -28,6 +25,7 @@ export default function Dashboard() {
   const [error, setError] = useState("");
 
   const { result, setResult } = useAnalysis();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   // -----------------------------------------
@@ -44,7 +42,7 @@ export default function Dashboard() {
     setResult(null);
 
     try {
-      const res = await axios.post(`${API_BASE_URL}/analyze`, { url });
+      const res = await api.post("/analyze", { url });
       setResult(res.data);
     } catch (err) {
       console.error(err);
@@ -116,6 +114,11 @@ export default function Dashboard() {
           HEADER SECTION
       ------------------------------------------ */}
       <Box textAlign="center" mb={4}>
+        <Box display="flex" justifyContent="flex-end" alignItems="center" gap={1} mb={2}>
+          <Typography variant="body2" color="text.secondary">{user.email}</Typography>
+          <Button variant="outlined" onClick={() => navigate("/history")}>History</Button>
+          <Button color="inherit" onClick={logout}>Logout</Button>
+        </Box>
         <Typography variant="h3" fontWeight="800" gutterBottom>
           🎬 YouTube Comment Analysis Dashboard
         </Typography>
