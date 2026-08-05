@@ -48,7 +48,7 @@
 // src/components/ThemePage.jsx
 import { Box, Paper, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useAnalysis } from "../context/AnalysisContext";
+import { useAnalysis } from "../context/useAnalysis";
 
 export default function ThemePage() {
   const { result } = useAnalysis();

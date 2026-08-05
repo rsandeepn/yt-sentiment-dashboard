@@ -15,11 +15,10 @@ import {
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { useNavigate } from "react-router-dom";
-import { useAnalysis } from "../context/AnalysisContext";
+import { useAnalysis } from "../context/useAnalysis";
 
 import StatsCharts from "./StatsCharts";
 import SummaryCard from "./summary/SummaryCard";
-import { parseSummary } from "../utils/parseSummary";
 import SuggestionCard from "./summary/SuggestionCard";
 
 export default function Dashboard() {
@@ -88,11 +87,6 @@ export default function Dashboard() {
 
     pdf.save("youtube-summary-report.pdf");
   };
-
-  // -----------------------------------------
-  // PARSE DETAILED SUMMARY INTO UI SECTIONS
-  // -----------------------------------------
-  const summarySections = result ? parseSummary(result.summary) : {};
 
   return (
     <Box p={4}>

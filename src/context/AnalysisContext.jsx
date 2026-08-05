@@ -1,6 +1,5 @@
-import { createContext, useContext, useState } from "react";
-
-const AnalysisContext = createContext(null);
+import { useState } from "react";
+import { AnalysisContext } from "./useAnalysis";
 
 export function AnalysisProvider({ children }) {
   const [result, setResult] = useState(null);
@@ -10,12 +9,4 @@ export function AnalysisProvider({ children }) {
       {children}
     </AnalysisContext.Provider>
   );
-}
-
-export function useAnalysis() {
-  const ctx = useContext(AnalysisContext);
-  if (!ctx) {
-    throw new Error("useAnalysis must be used inside <AnalysisProvider>");
-  }
-  return ctx;
 }
