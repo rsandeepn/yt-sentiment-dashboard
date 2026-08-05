@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/authContext";
 import {
   Card,
   CardContent,
@@ -7,16 +8,24 @@ import {
   Button,
   Typography,
   Box,
+  Alert,
 } from "@mui/material";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    // TODO: Call backend register API
-    navigate("/login");
+    setError("");
+    setLoading(true);
+    const result = await register(form.email, form.password);
+    setLoading(false);
+    if (result.success) navigate("/");
+    else setError(result.message);
   };
 
   return (
@@ -32,9 +41,13 @@ export default function Register() {
             Create Account
           </Typography>
 
+          {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
+
           <form onSubmit={submit}>
             <TextField
               label="Email"
+              type="email"
+              required
               fullWidth
               margin="normal"
               value={form.email}
@@ -44,14 +57,17 @@ export default function Register() {
             <TextField
               label="Password"
               type="password"
+              required
+              helperText="Use at least 8 characters."
+              inputProps={{ minLength: 8 }}
               fullWidth
               margin="normal"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
 
-            <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
-              Register
+            <Button type="submit" variant="contained" fullWidth disabled={loading} sx={{ mt: 2 }}>
+              {loading ? "Creating account..." : "Register"}
             </Button>
           </form>
 
