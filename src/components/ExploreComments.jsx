@@ -8,7 +8,32 @@ import {
   Grid,
   Pagination,
 } from "@mui/material";
-import { useAnalysis } from "../context/AnalysisContext";
+import { useAnalysis } from "../context/useAnalysis";
+
+const HighlightedText = ({ text, term }) => {
+  const query = term.trim();
+  if (!query) return text;
+
+  const parts = [];
+  const lowerText = text.toLowerCase();
+  const lowerQuery = query.toLowerCase();
+  let cursor = 0;
+  let matchIndex = lowerText.indexOf(lowerQuery, cursor);
+
+  while (matchIndex !== -1) {
+    parts.push(text.slice(cursor, matchIndex));
+    parts.push(
+      <mark key={`${matchIndex}-${cursor}`}>
+        {text.slice(matchIndex, matchIndex + query.length)}
+      </mark>,
+    );
+    cursor = matchIndex + query.length;
+    matchIndex = lowerText.indexOf(lowerQuery, cursor);
+  }
+
+  parts.push(text.slice(cursor));
+  return parts;
+};
 
 // =============================================================
 // PREMIUM COMMENT CARD COMPONENT
@@ -93,9 +118,7 @@ export default function ExploreComments() {
 
   const commentsPerPage = 6;
 
-  if (!result) return null;
-
-  const allComments = result.all_comments || [];
+  const allComments = useMemo(() => result?.all_comments || [], [result]);
 
   // ------------------------------------------------------------
   // SEARCH FILTER
@@ -105,13 +128,6 @@ export default function ExploreComments() {
     if (!t) return [];
     return allComments.filter((c) => c.text.toLowerCase().includes(t));
   }, [searchTerm, allComments]);
-
-  // Highlight matches
-  const highlight = (text, term) => {
-    if (!term) return text;
-    const regex = new RegExp(`(${term})`, "gi");
-    return text.replace(regex, "<mark>$1</mark>");
-  };
 
   // ------------------------------------------------------------
   // TOP POSITIVE / NEGATIVE
@@ -141,6 +157,8 @@ export default function ExploreComments() {
   }, [page, allComments]);
 
   const totalPages = Math.ceil(allComments.length / commentsPerPage);
+
+  if (!result) return null;
 
   // =============================================================
   // UI LAYOUT
@@ -190,13 +208,7 @@ export default function ExploreComments() {
               {searchResults.map((c, idx) => (
                 <PremiumCommentCard
                   key={idx}
-                  text={
-                    <span
-                      dangerouslySetInnerHTML={{
-                        __html: highlight(c.text, searchTerm),
-                      }}
-                    />
-                  }
+                  text={<HighlightedText text={c.text} term={searchTerm} />}
                   sentiment={c.sentiment}
                 />
               ))}
@@ -207,7 +219,7 @@ export default function ExploreComments() {
         {/* =========================================================
             ⭐ TOP POSITIVE + ⚠️ TOP NEGATIVE — PREMIUM UI
         ========================================================= */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12 }} sx={{ width: "100%" }}>
           <Paper
             sx={{
               p: 3,
@@ -251,7 +263,7 @@ export default function ExploreComments() {
 
             <Grid container spacing={2}>
               {/* POSITIVE */}
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography
                   color="success.main"
                   fontWeight="bold"
@@ -272,7 +284,7 @@ export default function ExploreComments() {
               </Grid>
 
               {/* NEGATIVE */}
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography color="error.main" fontWeight="bold" sx={{ mb: 1 }}>
                   ⚠️ Negative
                 </Typography>

@@ -12,12 +12,15 @@ import {
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { useNavigate } from "react-router-dom";
-import { useAnalysis } from "../context/AnalysisContext";
+import { useAnalysis } from "../context/useAnalysis";
 
-import StatsCharts from "./StatsCharts";
 import SummaryCard from "./summary/SummaryCard";
 import ExploreComments from "./ExploreComments";
 import Suggestioncard from "./summary/SuggestionCard";
+
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000"
+).replace(/\/$/, "");
 
 export default function Dashboard() {
   const [url, setUrl] = useState("");
@@ -41,11 +44,11 @@ export default function Dashboard() {
     setResult(null);
 
     try {
-      const res = await axios.post("http://127.0.0.1:8000/analyze", { url });
+      const res = await axios.post(`${API_BASE_URL}/analyze`, { url });
       setResult(res.data);
     } catch (err) {
       console.error(err);
-      setError("Failed to analyze video.");
+      setError(err.response?.data?.detail || "Failed to analyze video.");
     } finally {
       setLoading(false);
     }

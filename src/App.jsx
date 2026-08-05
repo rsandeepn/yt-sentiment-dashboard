@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./context/authContext";
 import ProtectedRoute from "./auth/ProtectedRoute";
 
 import Login from "./auth/Login";
@@ -10,9 +9,8 @@ import ClustersPage from "./components/ClustersPage";
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+    <BrowserRouter>
+      <Routes>
           {/* Protected Dashboard */}
           <Route
             path="/"
@@ -46,8 +44,7 @@ export default function App() {
           {/* Public auth routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+      </Routes>
+    </BrowserRouter>
   );
 }
