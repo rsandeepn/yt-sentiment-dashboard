@@ -7,7 +7,6 @@ import {
   Chip,
   Grid,
   Pagination,
-  autocompleteClasses,
 } from "@mui/material";
 import { useAnalysis } from "../context/AnalysisContext";
 
@@ -30,13 +29,13 @@ const PremiumCommentCard = ({ text, sentiment }) => {
         background: isPositive
           ? "linear-gradient(135deg, #E8FFF3, #FFFFFF)"
           : isNegative
-          ? "linear-gradient(135deg, #FFF0F0, #FFFFFF)"
-          : "linear-gradient(135deg, #F7F7F7, #FFFFFF)",
+            ? "linear-gradient(135deg, #FFF0F0, #FFFFFF)"
+            : "linear-gradient(135deg, #F7F7F7, #FFFFFF)",
         borderLeft: isPositive
           ? "6px solid #2ecc71"
           : isNegative
-          ? "6px solid #e74c3c"
-          : "6px solid #b2bec3",
+            ? "6px solid #e74c3c"
+            : "6px solid #b2bec3",
         boxShadow: "0 6px 16px rgba(0,0,0,0.08)",
         maxWidth: "100%",
       }}
@@ -50,8 +49,8 @@ const PremiumCommentCard = ({ text, sentiment }) => {
           background: isPositive
             ? "#2ecc71"
             : isNegative
-            ? "#e74c3c"
-            : "#b2bec3",
+              ? "#e74c3c"
+              : "#b2bec3",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -152,13 +151,12 @@ export default function ExploreComments() {
         {/* =========================================================
             🔍 SEARCH UI — PREMIUM COMPACT CARD
         ========================================================= */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12 }} sx={{ width: "100%" }}>
           <Paper
             sx={{
+              width: "100%",
               p: 3,
-              borderRadius: 4,
-              background: "linear-gradient(135deg, #F8FAFF, #FFFFFF)",
-              boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+              boxSizing: "border-box",
             }}
           >
             <Typography variant="h6" fontWeight="700" sx={{ mb: 2 }}>
@@ -184,8 +182,8 @@ export default function ExploreComments() {
               {searchTerm && searchResults.length > 0
                 ? `Found ${searchResults.length} comments`
                 : searchTerm
-                ? "No matching comments"
-                : "Start typing to search"}
+                  ? "No matching comments"
+                  : "Start typing to search"}
             </Typography>
 
             <Box sx={{ mt: 2 }}>
