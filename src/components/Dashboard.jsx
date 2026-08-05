@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Paper,
@@ -7,6 +7,8 @@ import {
   Button,
   CircularProgress,
   Divider,
+  LinearProgress,
+  Alert,
 } from "@mui/material";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -18,15 +20,49 @@ import api from "../api";
 import SummaryCard from "./summary/SummaryCard";
 import ExploreComments from "./ExploreComments";
 import Suggestioncard from "./summary/SuggestionCard";
+import { analysisJobOutcome, isActiveAnalysis } from "../utils/analysisJobs";
 
 export default function Dashboard() {
   const [url, setUrl] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const { result, setResult } = useAnalysis();
+  const { result, setResult, currentJob, setCurrentJob } = useAnalysis();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const analysisIsActive = isActiveAnalysis(currentJob);
+
+  useEffect(() => {
+    if (!analysisIsActive || !currentJob?.id) return undefined;
+
+    let cancelled = false;
+    let timer;
+    const poll = async () => {
+      try {
+        const response = await api.get(`/analyses/${currentJob.id}`);
+        if (cancelled) return;
+        const job = response.data;
+        if (analysisJobOutcome(job) === "results") {
+          setResult(job.result);
+          setCurrentJob(null);
+          return;
+        }
+        setCurrentJob(job);
+        if (analysisJobOutcome(job) === "poll") {
+          timer = window.setTimeout(poll, 1500);
+        }
+      } catch (requestError) {
+        if (!cancelled) {
+          setError(requestError.response?.data?.detail || "Unable to check analysis progress.");
+        }
+      }
+    };
+
+    poll();
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [analysisIsActive, currentJob?.id, setCurrentJob, setResult]);
 
   // -----------------------------------------
   // ANALYZE VIDEO
@@ -38,17 +74,20 @@ export default function Dashboard() {
     }
 
     setError("");
-    setLoading(true);
     setResult(null);
+    setCurrentJob(null);
 
     try {
-      const res = await api.post("/analyze", { url });
-      setResult(res.data);
+      const response = await api.post("/analyses", { url });
+      const job = response.data;
+      if (job.status === "completed") {
+        setResult(job.result);
+      } else {
+        setCurrentJob(job);
+      }
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.detail || "Failed to analyze video.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -164,6 +203,7 @@ export default function Dashboard() {
             placeholder="https://youtube.com/..."
             value={url}
             onChange={(e) => setUrl(e.target.value)}
+            disabled={analysisIsActive}
             sx={{
               maxWidth: 700,
               mx: "auto",
@@ -175,7 +215,7 @@ export default function Dashboard() {
 
           <Button
             variant="contained"
-            disabled={loading}
+            disabled={analysisIsActive}
             onClick={analyzeVideo}
             sx={{
               px: 4,
@@ -184,9 +224,29 @@ export default function Dashboard() {
               fontWeight: "bold",
             }}
           >
-            {loading ? <CircularProgress size={22} /> : "Analyze"}
+            {analysisIsActive ? <CircularProgress size={22} /> : "Analyze"}
           </Button>
         </Box>
+
+        {currentJob && (
+          <Box sx={{ maxWidth: 820, mx: "auto", mt: 3 }}>
+            {currentJob.status === "failed" ? (
+              <Alert severity="error">
+                {currentJob.error_message || "Analysis failed. Open History to retry."}
+              </Alert>
+            ) : (
+              <>
+                <Typography variant="body2" fontWeight={600} mb={1}>
+                  {currentJob.status_message || "Analysis in progress"} ({currentJob.progress}%)
+                </Typography>
+                <LinearProgress variant="determinate" value={currentJob.progress || 0} />
+                <Typography variant="caption" color="text.secondary">
+                  You can leave this page and reopen the analysis from History.
+                </Typography>
+              </>
+            )}
+          </Box>
+        )}
 
         {error && (
           <Typography mt={2} color="error" textAlign="center">
