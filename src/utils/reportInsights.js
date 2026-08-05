@@ -17,7 +17,6 @@ export function deriveInsights(result) {
     suggestion_percentage: total ? Number(((stats.suggestions || 0) / total * 100).toFixed(1)) : 0,
     average_sentiment_score: null,
     top_keywords: [],
-    language_breakdown: [],
   };
 }
 
@@ -27,7 +26,9 @@ export function reportFilename(result, extension) {
 }
 
 export function downloadJSONReport(result) {
-  const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json" });
+  const report = structuredClone(result);
+  if (report?.insights) delete report.insights.language_breakdown;
+  const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
   const objectUrl = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = objectUrl;

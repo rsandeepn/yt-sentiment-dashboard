@@ -11,11 +11,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Box, Chip, Grid, Paper, Stack, Typography } from "@mui/material";
+import { Box, Grid, Paper, Typography } from "@mui/material";
 
 const SENTIMENT_COLORS = ["#16a34a", "#dc2626", "#d97706"];
-const LANGUAGE_COLORS = ["#4f46e5", "#0891b2", "#7c3aed", "#db2777", "#65a30d", "#ea580c"];
-
 function ChartCard({ title, subtitle, children }) {
   return (
     <Paper sx={{ p: 3, borderRadius: 3, height: "100%", boxSizing: "border-box" }}>
@@ -35,7 +33,6 @@ export default function StatsCharts({ stats, insights }) {
     { name: "Neutral", value: stats.neutral || 0 },
   ];
   const keywords = insights?.top_keywords || [];
-  const languages = insights?.language_breakdown || [];
 
   return (
     <Box mt={3}>
@@ -99,22 +96,6 @@ export default function StatsCharts({ stats, insights }) {
                 </ResponsiveContainer>
               </Box>
             ) : <Typography color="text.secondary">Keyword data is unavailable for this saved analysis.</Typography>}
-          </ChartCard>
-        </Grid>
-
-        <Grid size={{ xs: 12 }}>
-          <ChartCard title="Comment script distribution" subtitle="Dominant writing script detected in each comment; Latin may include transliterated languages">
-            {languages.length ? (
-              <Stack direction="row" gap={1} flexWrap="wrap" useFlexGap>
-                {languages.map((item, index) => (
-                  <Chip
-                    key={item.language}
-                    label={`${item.language}: ${item.count} (${item.percentage.toFixed(1)}%)`}
-                    sx={{ color: "white", bgcolor: LANGUAGE_COLORS[index % LANGUAGE_COLORS.length], fontWeight: 600 }}
-                  />
-                ))}
-              </Stack>
-            ) : <Typography color="text.secondary">Script data is unavailable for this saved analysis.</Typography>}
           </ChartCard>
         </Grid>
       </Grid>
