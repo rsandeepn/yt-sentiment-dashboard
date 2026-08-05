@@ -20,11 +20,14 @@ import api from "../api";
 import SummaryCard from "./summary/SummaryCard";
 import ExploreComments from "./ExploreComments";
 import Suggestioncard from "./summary/SuggestionCard";
+import StatsCharts from "./StatsCharts";
 import { analysisJobOutcome, isActiveAnalysis } from "../utils/analysisJobs";
+import { deriveInsights, downloadJSONReport, reportFilename } from "../utils/reportInsights";
 
 export default function Dashboard() {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
+  const [exporting, setExporting] = useState(false);
 
   const { result, setResult, currentJob, setCurrentJob } = useAnalysis();
   const { user, logout } = useAuth();
@@ -91,55 +94,49 @@ export default function Dashboard() {
     }
   };
 
-  // -----------------------------------------
-  // PDF EXPORT
-  // -----------------------------------------
-  // const exportPDF = async () => {
-  //   const section = document.getElementById("report-section");
-  //   if (!section) return;
-
-  //   const canvas = await html2canvas(section, { scale: 2 });
-  //   const img = canvas.toDataURL("image/png");
-
-  //   const pdf = new jsPDF("p", "mm", "a4");
-  //   const pageWidth = pdf.internal.pageSize.getWidth();
-  //   const imgWidth = pageWidth;
-  //   const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-  //   pdf.addImage(img, "PNG", 0, 0, imgWidth, imgHeight);
-  //   pdf.save("youtube-summary-report.pdf");
-  // };
   const exportPDF = async () => {
     const section = document.getElementById("report-section");
     if (!section) return;
 
-    const canvas = await html2canvas(section, { scale: 2 });
-    const imgData = canvas.toDataURL("image/png");
+    setExporting(true);
+    setError("");
+    try {
+      const canvas = await html2canvas(section, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+      });
+      const imgData = canvas.toDataURL("image/png");
 
-    const pdf = new jsPDF("p", "mm", "a4");
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 8;
+      const usablePageHeight = pageHeight - margin * 2;
+      const imgWidth = pageWidth - margin * 2;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let renderedHeight = 0;
+      while (renderedHeight < imgHeight) {
+        if (renderedHeight > 0) pdf.addPage();
+        pdf.addImage(imgData, "PNG", margin, margin - renderedHeight, imgWidth, imgHeight);
+        renderedHeight += usablePageHeight;
+      }
 
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    // First page
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-
-    // Additional pages
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      pdf.save(reportFilename(result, "pdf"));
+    } catch (exportError) {
+      console.error(exportError);
+      setError("Unable to export this report. Please try again.");
+    } finally {
+      setExporting(false);
     }
-
-    pdf.save("youtube-summary-report.pdf");
   };
+
+  const exportJSON = () => {
+    downloadJSONReport(result);
+  };
+
+  const insights = result ? deriveInsights(result) : null;
 
   return (
     <Box
@@ -269,7 +266,7 @@ export default function Dashboard() {
           }}
         >
           {/* ACTION BUTTONS */}
-          <Box display="flex" justifyContent="flex-end" gap={2} mb={3}>
+          <Box display="flex" justifyContent="flex-end" flexWrap="wrap" gap={2} mb={3}>
             {/* <Button
               variant="outlined"
               onClick={() => navigate("/themes")}
@@ -295,16 +292,32 @@ export default function Dashboard() {
             </Button>
 
             <Button
+              variant="outlined"
+              onClick={exportJSON}
+              sx={{ borderRadius: "10px", fontWeight: "700", px: 3 }}
+            >
+              Export JSON
+            </Button>
+
+            <Button
               variant="contained"
               color="secondary"
               onClick={exportPDF}
+              disabled={exporting}
               sx={{ borderRadius: "10px", fontWeight: "700", px: 3 }}
             >
-              📄 Export PDF
+              {exporting ? "Preparing PDF…" : "📄 Export PDF"}
             </Button>
           </Box>
 
           <div id="report-section">
+            <Box mb={3}>
+              <Typography variant="h4" fontWeight={800}>YouTube Comment Analysis Report</Typography>
+              <Typography color="text.secondary">
+                {result.video?.id ? `Video ${result.video.id} · ` : ""}
+                Generated {new Date().toLocaleString()}
+              </Typography>
+            </Box>
             {/* -----------------------------------------
                 SIMPLE OVERVIEW (PREMIUM LOOK)
             ------------------------------------------ */}
@@ -320,18 +333,9 @@ export default function Dashboard() {
                   neutral: result.stats.neutral,
                   suggestions: result.stats.suggestions,
 
-                  posPct: (
-                    (result.stats.positive / result.stats.total) *
-                    100
-                  ).toFixed(1),
-                  negPct: (
-                    (result.stats.negative / result.stats.total) *
-                    100
-                  ).toFixed(1),
-                  neuPct: (
-                    (result.stats.neutral / result.stats.total) *
-                    100
-                  ).toFixed(1),
+                  posPct: insights.positive_percentage.toFixed(1),
+                  negPct: insights.negative_percentage.toFixed(1),
+                  neuPct: insights.neutral_percentage.toFixed(1),
                 },
                 text: "",
               }}
@@ -345,35 +349,35 @@ export default function Dashboard() {
             {/* -----------------------------------------
                 STATS CHARTS
             ------------------------------------------ */}
-            {/* <StatsCharts stats={result.stats} /> */}
+            <StatsCharts stats={result.stats} insights={insights} />
 
             {/* ⭐ VIEWER SUGGESTIONS (Premium UI Added Back) */}
             {result?.suggestions && (
               <Suggestioncard suggestions={result.suggestions} />
             )}
             <Divider sx={{ my: 4 }} />
-            {/* -----------------------------------------
-                EXPLORE COMMENTS (PREMIUM)
-            ------------------------------------------ */}
-            <Paper
-              sx={{
-                p: 3,
-                borderRadius: 3,
-                background: "rgba(245,245,255,0.6)",
-                boxShadow: "0 4px 18px rgba(0,0,0,0.06)",
-              }}
-            >
-              <Typography variant="h5" fontWeight="700" gutterBottom>
-                🔍 Explore Viewer Comments
-              </Typography>
-
-              <Typography color="text.secondary" sx={{ mb: 2 }}>
-                Search, filter and navigate through all viewer reactions.
-              </Typography>
-
-              <ExploreComments />
-            </Paper>
           </div>
+          {/* -----------------------------------------
+              EXPLORE COMMENTS (PREMIUM)
+          ------------------------------------------ */}
+          <Paper
+            sx={{
+              p: 3,
+              borderRadius: 3,
+              background: "rgba(245,245,255,0.6)",
+              boxShadow: "0 4px 18px rgba(0,0,0,0.06)",
+            }}
+          >
+            <Typography variant="h5" fontWeight="700" gutterBottom>
+              🔍 Explore Viewer Comments
+            </Typography>
+
+            <Typography color="text.secondary" sx={{ mb: 2 }}>
+              Search, filter and navigate through all viewer reactions.
+            </Typography>
+
+            <ExploreComments />
+          </Paper>
         </Paper>
       )}
     </Box>
