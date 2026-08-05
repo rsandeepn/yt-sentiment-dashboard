@@ -1,83 +1,104 @@
 import {
-  PieChart,
-  Pie,
+  Bar,
+  BarChart,
+  CartesianGrid,
   Cell,
   Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
   Tooltip,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
-  CartesianGrid,
 } from "recharts";
-import { Box, Typography, Paper } from "@mui/material";
+import { Box, Grid, Paper, Typography } from "@mui/material";
 
-const COLORS = ["#4caf50", "#f44336", "#ff9800"];
+const SENTIMENT_COLORS = ["#16a34a", "#dc2626", "#d97706"];
+function ChartCard({ title, subtitle, children }) {
+  return (
+    <Paper sx={{ p: 3, borderRadius: 3, height: "100%", boxSizing: "border-box" }}>
+      <Typography variant="h6" fontWeight={700}>{title}</Typography>
+      <Typography variant="body2" color="text.secondary" mb={2}>{subtitle}</Typography>
+      {children}
+    </Paper>
+  );
+}
 
-export default function StatsCharts({ stats }) {
+export default function StatsCharts({ stats, insights }) {
   if (!stats) return null;
 
-  const { positive, negative, neutral } = stats;
-
-  const pieData = [
-    { name: "Positive", value: positive },
-    { name: "Negative", value: negative },
-    { name: "Neutral", value: neutral },
+  const sentimentData = [
+    { name: "Positive", value: stats.positive || 0 },
+    { name: "Negative", value: stats.negative || 0 },
+    { name: "Neutral", value: stats.neutral || 0 },
   ];
-
-  const barData = [{ name: "Comments", positive, negative, neutral }];
+  const keywords = insights?.top_keywords || [];
 
   return (
-    <Box mt={4}>
-      <Box
-        display="flex"
-        flexDirection={{ xs: "column", md: "row" }}
-        gap={3}
-        justifyContent="space-between"
-      >
-        {/* ---------------- PIE CHART ---------------- */}
-        <Paper sx={{ flex: 1, p: 3 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Sentiment Distribution
-          </Typography>
+    <Box mt={3}>
+      <Grid container spacing={2} mb={3}>
+        <Grid size={{ xs: 12, sm: 4 }}>
+          <ChartCard title="Dominant sentiment" subtitle="Largest viewer reaction group">
+            <Typography variant="h4" fontWeight={800} textTransform="capitalize" color="primary.main">
+              {insights?.dominant_sentiment || "Unknown"}
+            </Typography>
+          </ChartCard>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 4 }}>
+          <ChartCard title="Average sentiment" subtitle="Score from -1 (negative) to +1 (positive)">
+            <Typography variant="h4" fontWeight={800}>
+              {insights?.average_sentiment_score == null
+                ? "N/A"
+                : insights.average_sentiment_score.toFixed(2)}
+            </Typography>
+          </ChartCard>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 4 }}>
+          <ChartCard title="Suggestion rate" subtitle="Comments containing an improvement request">
+            <Typography variant="h4" fontWeight={800}>
+              {(insights?.suggestion_percentage ?? 0).toFixed(1)}%
+            </Typography>
+          </ChartCard>
+        </Grid>
+      </Grid>
 
-          <PieChart width={350} height={260}>
-            <Pie
-              data={pieData}
-              cx={150}
-              cy={120}
-              labelLine={false}
-              outerRadius={80}
-              dataKey="value"
-              nameKey="name"
-            >
-              {pieData.map((_, idx) => (
-                <Cell key={idx} fill={COLORS[idx]} />
-              ))}
-            </Pie>
-            <Legend />
-            <Tooltip />
-          </PieChart>
-        </Paper>
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <ChartCard title="Sentiment distribution" subtitle="Share of analyzed comments by sentiment">
+            <Box sx={{ width: "100%", height: 300 }}>
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie data={sentimentData} dataKey="value" nameKey="name" innerRadius={58} outerRadius={92} paddingAngle={2}>
+                    {sentimentData.map((entry, index) => (
+                      <Cell key={entry.name} fill={SENTIMENT_COLORS[index]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </Box>
+          </ChartCard>
+        </Grid>
 
-        {/* ---------------- BAR CHART ---------------- */}
-        <Paper sx={{ flex: 1, p: 3 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Sentiment Comparison
-          </Typography>
-
-          <BarChart width={380} height={300} data={barData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="positive" fill="#4caf50" />
-            <Bar dataKey="negative" fill="#f44336" />
-            <Bar dataKey="neutral" fill="#ff9800" />
-          </BarChart>
-        </Paper>
-      </Box>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <ChartCard title="Top keywords" subtitle="Most frequently repeated discussion terms">
+            {keywords.length ? (
+              <Box sx={{ width: "100%", height: 300 }}>
+                <ResponsiveContainer>
+                  <BarChart data={keywords.slice(0, 8)} layout="vertical" margin={{ left: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                    <XAxis type="number" allowDecimals={false} />
+                    <YAxis dataKey="keyword" type="category" width={90} />
+                    <Tooltip />
+                    <Bar dataKey="count" name="Mentions" fill="#4f46e5" radius={[0, 6, 6, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </Box>
+            ) : <Typography color="text.secondary">Keyword data is unavailable for this saved analysis.</Typography>}
+          </ChartCard>
+        </Grid>
+      </Grid>
     </Box>
   );
 }

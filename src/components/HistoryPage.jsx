@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api";
 import { useAnalysis } from "../context/useAnalysis";
 import { historyQuery, isActiveAnalysis } from "../utils/analysisJobs";
+import { downloadJSONReport } from "../utils/reportInsights";
 
 const STATUS_COLORS = {
   completed: "success",
@@ -103,6 +104,16 @@ export default function HistoryPage() {
     }
   };
 
+  const downloadAnalysis = async (item) => {
+    setError("");
+    try {
+      const response = await api.get(`/analyses/${item.id}`);
+      downloadJSONReport(response.data.result);
+    } catch (requestError) {
+      setError(requestError.response?.data?.detail || "Unable to download this report.");
+    }
+  };
+
   return (
     <Box sx={{ maxWidth: 1100, mx: "auto", p: { xs: 2, sm: 4 } }}>
       <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" gap={2} mb={3}>
@@ -179,6 +190,9 @@ export default function HistoryPage() {
                       <Button variant="contained" onClick={() => openAnalysis(item)}>Open Results</Button>
                       <Button variant="outlined" onClick={() => startJob(`/analyses/${item.id}/reanalyze`)}>
                         Analyze Again
+                      </Button>
+                      <Button variant="outlined" onClick={() => downloadAnalysis(item)}>
+                        Download JSON
                       </Button>
                     </>
                   )}
