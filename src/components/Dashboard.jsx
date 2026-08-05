@@ -54,19 +54,50 @@ export default function Dashboard() {
   // -----------------------------------------
   // PDF EXPORT
   // -----------------------------------------
+  // const exportPDF = async () => {
+  //   const section = document.getElementById("report-section");
+  //   if (!section) return;
+
+  //   const canvas = await html2canvas(section, { scale: 2 });
+  //   const img = canvas.toDataURL("image/png");
+
+  //   const pdf = new jsPDF("p", "mm", "a4");
+  //   const pageWidth = pdf.internal.pageSize.getWidth();
+  //   const imgWidth = pageWidth;
+  //   const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+  //   pdf.addImage(img, "PNG", 0, 0, imgWidth, imgHeight);
+  //   pdf.save("youtube-summary-report.pdf");
+  // };
   const exportPDF = async () => {
     const section = document.getElementById("report-section");
     if (!section) return;
 
     const canvas = await html2canvas(section, { scale: 2 });
-    const img = canvas.toDataURL("image/png");
+    const imgData = canvas.toDataURL("image/png");
 
     const pdf = new jsPDF("p", "mm", "a4");
     const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
     const imgWidth = pageWidth;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    pdf.addImage(img, "PNG", 0, 0, imgWidth, imgHeight);
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // First page
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    // Additional pages
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
     pdf.save("youtube-summary-report.pdf");
   };
 
@@ -83,7 +114,7 @@ export default function Dashboard() {
       ------------------------------------------ */}
       <Box textAlign="center" mb={4}>
         <Typography variant="h3" fontWeight="800" gutterBottom>
-          🎬 YouTube Sentiment Dashboard
+          🎬 YouTube Comment Analysis Dashboard
         </Typography>
 
         <Typography
