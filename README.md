@@ -1,4 +1,33 @@
-# React + Vite
+# YouTube Sentiment Dashboard
+
+React and Vite frontend for the YouTube comment analyzer.
+
+## Local development
+
+```bash
+npm ci
+npm run dev -- --port 5173
+```
+
+Copy `.env.example` to `.env` when the backend is not running at the default
+`http://127.0.0.1:8000` address.
+
+## Validation
+
+```bash
+npm test
+npm run lint
+npm run build
+```
+
+## Docker
+
+The multi-stage Docker image builds the Vite application and serves it through
+Nginx. In the full Compose stack, Nginx proxies `/api` to the backend so the
+browser uses a single origin. See `DOCKER.md` in the backend repository for the
+complete setup.
+
+The remaining sections are the original Vite reference notes.
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
