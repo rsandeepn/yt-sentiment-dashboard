@@ -5,7 +5,6 @@ import {
   Box,
   Button,
   Container,
-  Divider,
   Menu,
   MenuItem,
   Stack,
@@ -81,19 +80,19 @@ export default function AppLayout({ children }) {
               </Button>
               <Button
                 color="secondary"
-                startIcon={<HistoryRoundedIcon />}
-                onClick={() => go("/history")}
-                sx={{ bgcolor: location.pathname === "/history" ? "#f1f1ef" : "transparent" }}
-              >
-                History
-              </Button>
-              <Button
-                color="secondary"
                 startIcon={<TipsAndUpdatesRoundedIcon />}
                 onClick={() => go("/suggestions")}
                 sx={{ bgcolor: location.pathname === "/suggestions" ? "#f1f1ef" : "transparent" }}
               >
                 Audience Suggestions
+              </Button>
+              <Button
+                color="secondary"
+                startIcon={<HistoryRoundedIcon />}
+                onClick={() => go("/history")}
+                sx={{ bgcolor: location.pathname === "/history" ? "#f1f1ef" : "transparent" }}
+              >
+                History
               </Button>
             </Stack>
 
@@ -114,13 +113,36 @@ export default function AppLayout({ children }) {
               </Button>
             </Tooltip>
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
-              <MenuItem onClick={() => go("/")}>Analyze a video</MenuItem>
-              <MenuItem onClick={() => go("/history")}>Analysis history</MenuItem>
-              <MenuItem onClick={() => go("/suggestions")}>Audience suggestions</MenuItem>
-              <Divider />
               <MenuItem onClick={logout}>Sign out</MenuItem>
             </Menu>
           </Toolbar>
+          <Stack
+            direction="row"
+            spacing={0.5}
+            sx={{ display: { xs: "flex", sm: "none" }, pb: 1, overflowX: "auto" }}
+          >
+            <Button
+              color="secondary"
+              onClick={() => go("/")}
+              sx={{ bgcolor: location.pathname === "/" ? "#f1f1ef" : "transparent", flexShrink: 0 }}
+            >
+              Analyze
+            </Button>
+            <Button
+              color="secondary"
+              onClick={() => go("/suggestions")}
+              sx={{ bgcolor: location.pathname === "/suggestions" ? "#f1f1ef" : "transparent", flexShrink: 0 }}
+            >
+              Audience Suggestions
+            </Button>
+            <Button
+              color="secondary"
+              onClick={() => go("/history")}
+              sx={{ bgcolor: location.pathname === "/history" ? "#f1f1ef" : "transparent", flexShrink: 0 }}
+            >
+              History
+            </Button>
+          </Stack>
         </Container>
       </AppBar>
 

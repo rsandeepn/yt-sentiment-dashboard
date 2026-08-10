@@ -22,7 +22,6 @@ import { useNavigate } from "react-router-dom";
 import { useAnalysis } from "../context/useAnalysis";
 import api from "../api";
 import ExploreComments from "./ExploreComments";
-import SuggestionCard from "./summary/SuggestionCard";
 import StatsCharts from "./StatsCharts";
 import { analysisJobOutcome, isActiveAnalysis } from "../utils/analysisJobs";
 import { deriveInsights, downloadJSONReport, reportFilename } from "../utils/reportInsights";
@@ -247,9 +246,6 @@ export default function Dashboard() {
               </Box>
             )}
             <StatsCharts stats={result.stats} insights={insights} />
-            {result.suggestions && (
-              <SuggestionCard suggestions={result.suggestions} onOpen={() => navigate("/suggestions")} />
-            )}
           </Paper>
 
           <Divider sx={{ my: 5 }} />
