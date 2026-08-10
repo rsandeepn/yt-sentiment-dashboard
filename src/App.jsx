@@ -7,6 +7,7 @@ import Dashboard from "./components/Dashboard";
 import ThemePage from "./components/ThemePage";
 import ClustersPage from "./components/ClustersPage";
 import HistoryPage from "./components/HistoryPage";
+import SuggestionsPage from "./components/SuggestionsPage";
 import AppLayout from "./layout/AppLayout";
 
 function ProtectedPage({ children }) {
@@ -49,6 +50,13 @@ export default function App() {
             path="/history"
             element={
               <ProtectedPage><HistoryPage /></ProtectedPage>
+            }
+          />
+
+          <Route
+            path="/suggestions"
+            element={
+              <ProtectedPage><SuggestionsPage /></ProtectedPage>
             }
           />
 

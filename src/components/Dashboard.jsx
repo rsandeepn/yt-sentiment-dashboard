@@ -247,7 +247,9 @@ export default function Dashboard() {
               </Box>
             )}
             <StatsCharts stats={result.stats} insights={insights} />
-            {result.suggestions && <SuggestionCard suggestions={result.suggestions} />}
+            {result.suggestions && (
+              <SuggestionCard suggestions={result.suggestions} onOpen={() => navigate("/suggestions")} />
+            )}
           </Paper>
 
           <Divider sx={{ my: 5 }} />

@@ -17,6 +17,7 @@ import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
 import InsightsRoundedIcon from "@mui/icons-material/InsightsRounded";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
+import TipsAndUpdatesRoundedIcon from "@mui/icons-material/TipsAndUpdatesRounded";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext";
 
@@ -86,6 +87,14 @@ export default function AppLayout({ children }) {
               >
                 History
               </Button>
+              <Button
+                color="secondary"
+                startIcon={<TipsAndUpdatesRoundedIcon />}
+                onClick={() => go("/suggestions")}
+                sx={{ bgcolor: location.pathname === "/suggestions" ? "#f1f1ef" : "transparent" }}
+              >
+                Audience Suggestions
+              </Button>
             </Stack>
 
             <Box sx={{ flexGrow: 1 }} />
@@ -107,6 +116,7 @@ export default function AppLayout({ children }) {
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
               <MenuItem onClick={() => go("/")}>Analyze a video</MenuItem>
               <MenuItem onClick={() => go("/history")}>Analysis history</MenuItem>
+              <MenuItem onClick={() => go("/suggestions")}>Audience suggestions</MenuItem>
               <Divider />
               <MenuItem onClick={logout}>Sign out</MenuItem>
             </Menu>
