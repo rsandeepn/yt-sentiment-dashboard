@@ -4,10 +4,12 @@ import {
   Paper,
   Typography,
   TextField,
+  InputAdornment,
   Chip,
   Grid,
   Pagination,
 } from "@mui/material";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import { useAnalysis } from "../context/useAnalysis";
 import { createCommentSearch } from "../utils/commentSearch";
 
@@ -171,23 +173,59 @@ export default function ExploreComments() {
               width: "100%",
               p: { xs: 2, md: 2.5 },
               boxSizing: "border-box",
+              background: "#fff7f8",
+              border: "1px solid #f0d7dc",
             }}
           >
-            <Typography variant="h6" fontWeight="700" sx={{ mb: 2 }}>
-              Search comments
-            </Typography>
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="h6" fontWeight="700">
+                Search comments
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.35 }}>
+                Quickly find audience feedback across every analyzed comment.
+              </Typography>
+            </Box>
 
             <TextField
               fullWidth
               placeholder="Search comments by topic, phrase, or language..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchRoundedIcon sx={{ color: "#c51630" }} />
+                    </InputAdornment>
+                  ),
+                },
+                htmlInput: {
+                  "aria-label": "Search analyzed comments",
+                },
+              }}
               sx={{
                 width: "100%",
                 "& .MuiOutlinedInput-root": {
-                  height: "48px",
+                  height: "52px",
                   borderRadius: "10px",
                   fontSize: "1rem",
+                  backgroundColor: "#ffffff",
+                  boxShadow: "0 4px 14px rgba(24, 24, 27, 0.06)",
+                  transition: "box-shadow 160ms ease, background-color 160ms ease",
+                  "& fieldset": {
+                    borderColor: "#9a9a9f",
+                    borderWidth: "1.5px",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#68686f",
+                  },
+                  "&.Mui-focused": {
+                    boxShadow: "0 0 0 4px rgba(230, 33, 60, 0.12)",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#e6213c",
+                    borderWidth: "2px",
+                  },
                 },
               }}
             />
