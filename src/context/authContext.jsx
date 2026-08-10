@@ -52,9 +52,9 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener("auth:unauthorized", handleUnauthorized);
   }, []);
 
-  const authenticate = async (path, email, password) => {
+  const authenticate = async (path, payload) => {
     try {
-      const response = await api.post(path, { email, password });
+      const response = await api.post(path, payload);
       saveSession(response.data);
       return { success: true };
     } catch (error) {
@@ -65,13 +65,13 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const login = (email, password) => authenticate("/auth/login", email, password);
-  const register = (email, password) =>
-    authenticate("/auth/register", email, password);
+  const login = (email, password) => authenticate("/auth/login", { email, password });
+  const register = (profile) => authenticate("/auth/register", profile);
+  const googleLogin = (credential) => authenticate("/auth/google", { credential });
   const logout = () => clearSession();
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, googleLogin, logout }}>
       {children}
     </AuthContext.Provider>
   );

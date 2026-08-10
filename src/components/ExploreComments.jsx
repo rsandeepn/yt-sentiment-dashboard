@@ -9,6 +9,7 @@ import {
   Pagination,
 } from "@mui/material";
 import { useAnalysis } from "../context/useAnalysis";
+import { createCommentSearch } from "../utils/commentSearch";
 
 const HighlightedText = ({ text, term }) => {
   const query = term.trim();
@@ -115,15 +116,14 @@ export default function ExploreComments() {
   const commentsPerPage = 6;
 
   const allComments = useMemo(() => result?.all_comments || [], [result]);
+  const commentSearch = useMemo(() => createCommentSearch(allComments), [allComments]);
 
   // ------------------------------------------------------------
   // SEARCH FILTER
   // ------------------------------------------------------------
   const searchResults = useMemo(() => {
-    const t = searchTerm.trim().toLowerCase();
-    if (!t) return [];
-    return allComments.filter((c) => c.text.toLowerCase().includes(t));
-  }, [searchTerm, allComments]);
+    return commentSearch(searchTerm);
+  }, [searchTerm, commentSearch]);
 
   // ------------------------------------------------------------
   // TOP POSITIVE / NEGATIVE
@@ -179,7 +179,7 @@ export default function ExploreComments() {
 
             <TextField
               fullWidth
-              placeholder="Search (hero, bgm, boring, song...)"
+              placeholder="Search comments by topic, phrase, or language..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               sx={{
@@ -197,7 +197,7 @@ export default function ExploreComments() {
                 ? `Found ${searchResults.length} comments`
                 : searchTerm
                   ? "No matching comments"
-                  : "Start typing to search"}
+                  : "Spelling variations and transliterated words are supported."}
             </Typography>
 
             <Box sx={{ mt: 2 }}>

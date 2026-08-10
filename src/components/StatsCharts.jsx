@@ -11,6 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import { Box, Grid, Paper, Stack, Typography } from "@mui/material";
+import { filterMeaningfulKeywords } from "../utils/keywordFilters";
 
 const SENTIMENT_COLORS = ["#168a45", "#e6213c", "#d97706"];
 
@@ -43,7 +44,7 @@ export default function StatsCharts({ stats, insights }) {
     { name: "Negative", value: stats.negative || 0 },
     { name: "Neutral", value: stats.neutral || 0 },
   ];
-  const keywords = insights?.top_keywords || [];
+  const keywords = filterMeaningfulKeywords(insights?.top_keywords);
   const total = stats.total || sentimentData.reduce((sum, item) => sum + item.value, 0);
 
   return (

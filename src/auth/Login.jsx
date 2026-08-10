@@ -9,6 +9,7 @@ import {
   Stack,
 } from "@mui/material";
 import AuthPageShell from "./AuthPageShell";
+import GoogleSignInButton from "./GoogleSignInButton";
 
 export default function Login() {
   const { login } = useAuth();
@@ -56,6 +57,8 @@ export default function Login() {
             </Button>
             </Stack>
           </form>
+
+          <GoogleSignInButton onAuthenticated={() => navigate("/")} />
 
           <Typography variant="body2" mt={3} color="text.secondary">
             Don’t have an account? <Link to="/register">Register</Link>

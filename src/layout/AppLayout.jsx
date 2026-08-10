@@ -48,7 +48,8 @@ export default function AppLayout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const email = user?.email || "Account";
+  const displayName = [user?.first_name, user?.last_name].filter(Boolean).join(" ");
+  const accountLabel = displayName || user?.email || "Account";
 
   const go = (path) => {
     navigate(path);
@@ -97,7 +98,7 @@ export default function AppLayout({ children }) {
             </Stack>
 
             <Box sx={{ flexGrow: 1 }} />
-            <Tooltip title={email}>
+            <Tooltip title={user?.email || accountLabel}>
               <Button
                 color="secondary"
                 onClick={(event) => setAnchorEl(event.currentTarget)}
@@ -105,10 +106,10 @@ export default function AppLayout({ children }) {
                 sx={{ minWidth: 0, px: 1 }}
               >
                 <Avatar sx={{ width: 32, height: 32, bgcolor: "secondary.main", fontSize: 13, fontWeight: 700 }}>
-                  {email.charAt(0).toUpperCase()}
+                  {accountLabel.charAt(0).toUpperCase()}
                 </Avatar>
                 <Typography variant="body2" sx={{ ml: 1, maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", display: { xs: "none", md: "block" } }}>
-                  {email}
+                  {accountLabel}
                 </Typography>
               </Button>
             </Tooltip>
