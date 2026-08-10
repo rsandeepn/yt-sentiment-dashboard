@@ -2,14 +2,13 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext";
 import {
-  Card,
-  CardContent,
   TextField,
   Button,
   Typography,
-  Box,
   Alert,
+  Stack,
 } from "@mui/material";
+import AuthPageShell from "./AuthPageShell";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -29,27 +28,15 @@ export default function Register() {
   };
 
   return (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      height="90vh"
-    >
-      <Card sx={{ width: 380, p: 2 }}>
-        <CardContent>
-          <Typography variant="h5" mb={2}>
-            Create Account
-          </Typography>
-
-          {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
-
+    <AuthPageShell eyebrow="Get started" title="Create your account" subtitle="Build multilingual audience reports and keep every analysis organized.">
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
           <form onSubmit={submit}>
+            <Stack spacing={2.25}>
             <TextField
               label="Email"
               type="email"
               required
               fullWidth
-              margin="normal"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
@@ -61,21 +48,19 @@ export default function Register() {
               helperText="Use at least 8 characters."
               inputProps={{ minLength: 8 }}
               fullWidth
-              margin="normal"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
 
-            <Button type="submit" variant="contained" fullWidth disabled={loading} sx={{ mt: 2 }}>
+            <Button type="submit" variant="contained" fullWidth disabled={loading} size="large">
               {loading ? "Creating account..." : "Register"}
             </Button>
+            </Stack>
           </form>
 
-          <Typography variant="body2" mt={2}>
+          <Typography variant="body2" mt={3} color="text.secondary">
             Already have an account? <Link to="/login">Login</Link>
           </Typography>
-        </CardContent>
-      </Card>
-    </Box>
+    </AuthPageShell>
   );
 }

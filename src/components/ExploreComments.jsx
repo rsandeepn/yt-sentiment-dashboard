@@ -46,22 +46,18 @@ const PremiumCommentCard = ({ text, sentiment }) => {
     <Paper
       sx={{
         p: 2,
-        borderRadius: 4,
-        mb: 2,
+        borderRadius: 2,
+        mb: 1.25,
         display: "flex",
         alignItems: "flex-start",
         gap: 2,
-        background: isPositive
-          ? "linear-gradient(135deg, #E8FFF3, #FFFFFF)"
-          : isNegative
-            ? "linear-gradient(135deg, #FFF0F0, #FFFFFF)"
-            : "linear-gradient(135deg, #F7F7F7, #FFFFFF)",
+        background: "#ffffff",
         borderLeft: isPositive
-          ? "6px solid #2ecc71"
+          ? "3px solid #168a45"
           : isNegative
-            ? "6px solid #e74c3c"
-            : "6px solid #b2bec3",
-        boxShadow: "0 6px 16px rgba(0,0,0,0.08)",
+            ? "3px solid #e6213c"
+            : "3px solid #d97706",
+        boxShadow: "none",
         maxWidth: "100%",
       }}
     >
@@ -70,12 +66,12 @@ const PremiumCommentCard = ({ text, sentiment }) => {
         sx={{
           width: 38,
           height: 38,
-          borderRadius: "50%",
+          borderRadius: "9px",
           background: isPositive
-            ? "#2ecc71"
+            ? "#168a45"
             : isNegative
-              ? "#e74c3c"
-              : "#b2bec3",
+              ? "#e6213c"
+              : "#d97706",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -83,10 +79,10 @@ const PremiumCommentCard = ({ text, sentiment }) => {
           fontWeight: "bold",
           fontSize: "1.1rem",
           flexShrink: 0,
-          boxShadow: "0 3px 10px rgba(0,0,0,0.15)",
+          boxShadow: "none",
         }}
       >
-        {isPositive ? "👍" : isNegative ? "⚠️" : "💬"}
+        {isPositive ? "+" : isNegative ? "−" : "="}
       </Box>
 
       {/* TEXT */}
@@ -95,7 +91,7 @@ const PremiumCommentCard = ({ text, sentiment }) => {
         sx={{
           fontSize: "0.95rem",
           lineHeight: 1.6,
-          color: "#2d3436",
+          color: "#343438",
           wordBreak: "break-word",
         }}
       >
@@ -173,12 +169,12 @@ export default function ExploreComments() {
           <Paper
             sx={{
               width: "100%",
-              p: 3,
+              p: { xs: 2, md: 2.5 },
               boxSizing: "border-box",
             }}
           >
             <Typography variant="h6" fontWeight="700" sx={{ mb: 2 }}>
-              🔍 Search by Keyword
+              Search comments
             </Typography>
 
             <TextField
@@ -196,7 +192,7 @@ export default function ExploreComments() {
               }}
             />
 
-            <Typography variant="body2" sx={{ mt: 2 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
               {searchTerm && searchResults.length > 0
                 ? `Found ${searchResults.length} comments`
                 : searchTerm
@@ -222,14 +218,14 @@ export default function ExploreComments() {
         <Grid size={{ xs: 12 }} sx={{ width: "100%" }}>
           <Paper
             sx={{
-              p: 3,
-              borderRadius: 4,
-              background: "linear-gradient(135deg, #FFF8E8, #FFFFFF)",
-              boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
+              p: { xs: 2, md: 2.5 },
+              borderRadius: 3,
+              background: "#ffffff",
+              boxShadow: "none",
             }}
           >
             <Typography variant="h6" fontWeight="700" sx={{ mb: 2 }}>
-              ⭐ Top Positive & ⚠️ Top Negative
+              Comment highlights
             </Typography>
 
             {/* Inputs */}
@@ -269,7 +265,7 @@ export default function ExploreComments() {
                   fontWeight="bold"
                   sx={{ mb: 1 }}
                 >
-                  ⭐ Positive
+                  Most positive
                 </Typography>
 
                 <Box>
@@ -286,7 +282,7 @@ export default function ExploreComments() {
               {/* NEGATIVE */}
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography color="error.main" fontWeight="bold" sx={{ mb: 1 }}>
-                  ⚠️ Negative
+                  Most critical
                 </Typography>
 
                 <Box>
@@ -309,15 +305,15 @@ export default function ExploreComments() {
       ========================================================= */}
       <Paper
         sx={{
-          p: 3,
+          p: { xs: 2, md: 2.5 },
           mt: 4,
-          borderRadius: 4,
-          background: "linear-gradient(135deg, #FAFAFA, #FFFFFF)",
-          boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
+          borderRadius: 3,
+          background: "#ffffff",
+          boxShadow: "none",
         }}
       >
         <Typography variant="h6" fontWeight="700" sx={{ mb: 2 }}>
-          📜 All Comments ({allComments.length})
+          All comments ({allComments.length})
         </Typography>
 
         {/* Top Pagination */}

@@ -1,52 +1,5 @@
-// // src/components/ThemePage.jsx
-// import { Box, Paper, Typography, Button } from "@mui/material";
-// import { useNavigate } from "react-router-dom";
-// import { useAnalysis } from "../context/AnalysisContext";
-// import ThemeCard from "./summary/ThemeCard";
-
-// export default function ThemePage() {
-//   const { result } = useAnalysis();
-//   const navigate = useNavigate();
-
-//   if (!result || !result.themes) {
-//     return (
-//       <Box p={4}>
-//         <Typography variant="h5" gutterBottom>
-//           No theme insights available ❗
-//         </Typography>
-//         <Typography color="text.secondary">
-//           Please analyze a YouTube video from the dashboard first.
-//         </Typography>
-//         <Button
-//           sx={{ mt: 2 }}
-//           variant="contained"
-//           onClick={() => navigate("/")}
-//         >
-//           ← Back to Dashboard
-//         </Button>
-//       </Box>
-//     );
-//   }
-
-//   return (
-//     <Box p={4}>
-//       <Typography variant="h4" fontWeight="bold" gutterBottom>
-//         🎯 Comment Theme Insights
-//       </Typography>
-
-//       <Button variant="outlined" sx={{ mb: 3 }} onClick={() => navigate("/")}>
-//         ← Back to Dashboard
-//       </Button>
-
-//       <Paper sx={{ p: 3 }}>
-//         <ThemeCard themes={result.themes} />
-//       </Paper>
-//     </Box>
-//   );
-// }
-
-// src/components/ThemePage.jsx
-import { Box, Paper, Typography, Button } from "@mui/material";
+import { Box, Button, Container, Paper, Typography } from "@mui/material";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import { useNavigate } from "react-router-dom";
 import { useAnalysis } from "../context/useAnalysis";
 
@@ -54,46 +7,29 @@ export default function ThemePage() {
   const { result } = useAnalysis();
   const navigate = useNavigate();
 
-  if (!result) {
-    return (
-      <Box p={4}>
-        <Typography variant="h5">No theme overview available.</Typography>
-        <Button
-          sx={{ mt: 2 }}
-          variant="contained"
-          onClick={() => navigate("/")}
-        >
-          ← Back to Dashboard
-        </Button>
-      </Box>
-    );
-  }
-
   return (
-    <Box p={4}>
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
-        🎯 Theme Overview
-      </Typography>
-
-      <Button variant="outlined" sx={{ mb: 3 }} onClick={() => navigate("/")}>
-        ← Back to Dashboard
+    <Container maxWidth={false} sx={{ maxWidth: 1100, py: { xs: 4, md: 7 } }}>
+      <Button color="secondary" startIcon={<ArrowBackRoundedIcon />} onClick={() => navigate("/")} sx={{ mb: 3 }}>
+        Back to report
       </Button>
+      <Typography variant="overline" color="primary" fontWeight={750}>Conversation themes</Typography>
+      <Typography variant="h2" mt={0.5}>Theme overview</Typography>
+      <Typography color="text.secondary" mt={1} mb={3}>A concise view of the topics shaping the discussion.</Typography>
 
-      <Paper
-        elevation={3}
-        sx={{
-          p: 3,
-          borderRadius: 4,
-          background: "linear-gradient(135deg, #eef6ff 0%, #ffffff 100%)",
-        }}
-      >
-        <Typography
-          variant="body1"
-          sx={{ whiteSpace: "pre-line", lineHeight: 1.7 }}
-        >
-          {result.theme_overview}
-        </Typography>
-      </Paper>
-    </Box>
+      {!result ? (
+        <Paper sx={{ p: 6, textAlign: "center", bgcolor: "#fafaf9" }}>
+          <Typography variant="h5">No report is open</Typography>
+          <Typography color="text.secondary" mt={1} mb={2}>Analyze a video or open a saved report first.</Typography>
+          <Button variant="contained" onClick={() => navigate("/")}>Analyze a video</Button>
+        </Paper>
+      ) : (
+        <Paper sx={{ p: { xs: 3, md: 5 } }}>
+          <Box sx={{ width: 44, height: 4, bgcolor: "primary.main", mb: 3 }} />
+          <Typography sx={{ whiteSpace: "pre-line", lineHeight: 1.85, fontSize: "1.05rem" }}>
+            {result.theme_overview || "No theme overview is available for this report."}
+          </Typography>
+        </Paper>
+      )}
+    </Container>
   );
 }

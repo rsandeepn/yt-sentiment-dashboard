@@ -4,12 +4,11 @@ import { useNavigate, Link } from "react-router-dom";
 import {
   Button,
   TextField,
-  Card,
-  CardContent,
   Typography,
-  Box,
   Alert,
+  Stack,
 } from "@mui/material";
+import AuthPageShell from "./AuthPageShell";
 
 export default function Login() {
   const { login } = useAuth();
@@ -29,27 +28,15 @@ export default function Login() {
   };
 
   return (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      height="90vh"
-    >
-      <Card sx={{ width: 380, p: 2 }}>
-        <CardContent>
-          <Typography variant="h5" mb={2}>
-            Login
-          </Typography>
-
-          {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
-
+    <AuthPageShell eyebrow="Welcome back" title="Sign in to CommentScope" subtitle="Continue to your analysis dashboard and saved reports.">
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
           <form onSubmit={submit}>
+            <Stack spacing={2.25}>
             <TextField
               label="Email"
               type="email"
               required
               fullWidth
-              margin="normal"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
@@ -60,21 +47,19 @@ export default function Login() {
               required
               inputProps={{ minLength: 8 }}
               fullWidth
-              margin="normal"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
 
-            <Button type="submit" variant="contained" fullWidth disabled={loading} sx={{ mt: 2 }}>
+            <Button type="submit" variant="contained" fullWidth disabled={loading} size="large">
               {loading ? "Signing in..." : "Sign In"}
             </Button>
+            </Stack>
           </form>
 
-          <Typography variant="body2" mt={2}>
+          <Typography variant="body2" mt={3} color="text.secondary">
             Don’t have an account? <Link to="/register">Register</Link>
           </Typography>
-        </CardContent>
-      </Card>
-    </Box>
+    </AuthPageShell>
   );
 }

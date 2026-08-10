@@ -7,6 +7,15 @@ import Dashboard from "./components/Dashboard";
 import ThemePage from "./components/ThemePage";
 import ClustersPage from "./components/ClustersPage";
 import HistoryPage from "./components/HistoryPage";
+import AppLayout from "./layout/AppLayout";
+
+function ProtectedPage({ children }) {
+  return (
+    <ProtectedRoute>
+      <AppLayout>{children}</AppLayout>
+    </ProtectedRoute>
+  );
+}
 
 export default function App() {
   return (
@@ -16,9 +25,7 @@ export default function App() {
           <Route
             path="/"
             element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
+              <ProtectedPage><Dashboard /></ProtectedPage>
             }
           />
 
@@ -26,9 +33,7 @@ export default function App() {
           <Route
             path="/themes"
             element={
-              <ProtectedRoute>
-                <ThemePage />
-              </ProtectedRoute>
+              <ProtectedPage><ThemePage /></ProtectedPage>
             }
           />
 
@@ -36,18 +41,14 @@ export default function App() {
           <Route
             path="/clusters"
             element={
-              <ProtectedRoute>
-                <ClustersPage />
-              </ProtectedRoute>
+              <ProtectedPage><ClustersPage /></ProtectedPage>
             }
           />
 
           <Route
             path="/history"
             element={
-              <ProtectedRoute>
-                <HistoryPage />
-              </ProtectedRoute>
+              <ProtectedPage><HistoryPage /></ProtectedPage>
             }
           />
 
