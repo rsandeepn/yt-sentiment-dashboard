@@ -1,97 +1,30 @@
-// // src/components/ClustersPage.jsx
-// import { Box, Paper, Typography, Chip, Button, Divider } from "@mui/material";
-// import { useNavigate } from "react-router-dom";
-// import { useAnalysis } from "../context/AnalysisContext";
-
-// export default function ClustersPage() {
-//   const { result } = useAnalysis();
-//   const navigate = useNavigate();
-
-//   if (!result) {
-//     return (
-//       <Box p={4}>
-//         <Typography variant="h5" gutterBottom>
-//           No cluster data available ❗
-//         </Typography>
-//         <Typography color="text.secondary">
-//           Please analyze a YouTube video from the dashboard first.
-//         </Typography>
-//         <Button
-//           sx={{ mt: 2 }}
-//           variant="contained"
-//           onClick={() => navigate("/")}
-//         >
-//           ← Back to Dashboard
-//         </Button>
-//       </Box>
-//     );
-//   }
-
-//   return (
-//     <Box p={4}>
-//       <Typography variant="h4" fontWeight="bold" gutterBottom>
-//         🧩 Comment Clusters
-//       </Typography>
-
-//       <Button variant="outlined" sx={{ mb: 3 }} onClick={() => navigate("/")}>
-//         ← Back to Dashboard
-//       </Button>
-
-//       {/* Positive Clusters */}
-//       <Typography variant="h6" gutterBottom>
-//         ⭐ Positive Themes
-//       </Typography>
-//       {Object.entries(result.positive_clusters || {}).map(([id, c]) => (
-//         <Paper key={id} sx={{ p: 2, mb: 2, background: "#e8f5e9" }}>
-//           <Chip
-//             label={`Cluster #${id}`}
-//             color="success"
-//             size="small"
-//             sx={{ mb: 1 }}
-//           />
-//           <Typography fontWeight="bold">{c.summary}</Typography>
-//           <ul>
-//             {c.examples.map((ex, idx) => (
-//               <li key={idx}>
-//                 <Typography variant="body2">{ex}</Typography>
-//               </li>
-//             ))}
-//           </ul>
-//         </Paper>
-//       ))}
-
-//       <Divider sx={{ my: 3 }} />
-
-//       {/* Negative Clusters */}
-//       <Typography variant="h6" gutterBottom>
-//         ⚠️ Negative Themes
-//       </Typography>
-//       {Object.entries(result.negative_clusters || {}).map(([id, c]) => (
-//         <Paper key={id} sx={{ p: 2, mb: 2, background: "#ffebee" }}>
-//           <Chip
-//             label={`Cluster #${id}`}
-//             color="error"
-//             size="small"
-//             sx={{ mb: 1 }}
-//           />
-//           <Typography fontWeight="bold">{c.summary}</Typography>
-//           <ul>
-//             {c.examples.map((ex, idx) => (
-//               <li key={idx}>
-//                 <Typography variant="body2">{ex}</Typography>
-//               </li>
-//             ))}
-//           </ul>
-//         </Paper>
-//       ))}
-//     </Box>
-//   );
-// }
-
-// src/components/ClustersPage.jsx
-import { Box, Paper, Typography, Button, Chip, Divider } from "@mui/material";
+import { Box, Button, Container, Grid, Paper, Stack, Typography } from "@mui/material";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import { useNavigate } from "react-router-dom";
 import { useAnalysis } from "../context/useAnalysis";
+
+function ClusterColumn({ eyebrow, title, clusters, color, tint }) {
+  const entries = Object.entries(clusters || {});
+  return (
+    <Paper sx={{ p: { xs: 2.5, md: 3.5 }, height: "100%" }}>
+      <Typography variant="overline" sx={{ color, fontWeight: 750 }}>{eyebrow}</Typography>
+      <Typography variant="h3" mt={0.5} mb={2.5}>{title}</Typography>
+      <Stack spacing={1.5}>
+        {entries.length ? entries.map(([id, cluster], index) => (
+          <Box key={id} sx={{ p: 2.25, borderRadius: 2, bgcolor: tint, borderLeft: `3px solid ${color}` }}>
+            <Typography variant="caption" color="text.secondary">Theme {index + 1}</Typography>
+            <Typography fontWeight={680} mt={0.5} mb={1}>{cluster.summary}</Typography>
+            {(cluster.examples || []).slice(0, 3).map((example, exampleIndex) => (
+              <Typography key={`${id}-${exampleIndex}`} variant="body2" color="text.secondary" sx={{ mt: 0.75, lineHeight: 1.6 }}>
+                “{example}”
+              </Typography>
+            ))}
+          </Box>
+        )) : <Typography color="text.secondary">No themes were detected in this group.</Typography>}
+      </Stack>
+    </Paper>
+  );
+}
 
 export default function ClustersPage() {
   const { result } = useAnalysis();
@@ -99,132 +32,41 @@ export default function ClustersPage() {
 
   if (!result) {
     return (
-      <Box p={4}>
-        <Typography variant="h5">No data available ❗</Typography>
-        <Button
-          variant="contained"
-          sx={{ mt: 2 }}
-          onClick={() => navigate("/")}
-        >
-          ← Back to Dashboard
-        </Button>
-      </Box>
+      <Container maxWidth={false} sx={{ maxWidth: 1100, py: 8 }}>
+        <Paper sx={{ p: 7, textAlign: "center", bgcolor: "#fafaf9" }}>
+          <Typography variant="h4">No report is open</Typography>
+          <Typography color="text.secondary" mt={1} mb={2}>Analyze a video or open a report from History first.</Typography>
+          <Button variant="contained" onClick={() => navigate("/")}>Analyze a video</Button>
+        </Paper>
+      </Container>
     );
   }
 
-  const { positive_clusters, negative_clusters, suggestions } = result;
-
   return (
-    <Box p={4}>
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
-        🧩 Detailed Cluster Insights
-      </Typography>
-
-      <Button variant="outlined" sx={{ mb: 3 }} onClick={() => navigate("/")}>
-        ← Back to Dashboard
+    <Container maxWidth={false} sx={{ maxWidth: 1480, py: { xs: 4, md: 7 } }}>
+      <Button color="secondary" startIcon={<ArrowBackRoundedIcon />} onClick={() => navigate("/")} sx={{ mb: 3 }}>
+        Back to report
       </Button>
+      <Typography variant="overline" color="primary" fontWeight={750}>Deeper analysis</Typography>
+      <Typography variant="h2" mt={0.5}>Detailed themes</Typography>
+      <Typography color="text.secondary" mt={1} mb={4}>The recurring positive and critical conversations behind the headline metrics.</Typography>
 
-      {/* ⭐ POSITIVE THEMES */}
-      <Paper elevation={3} sx={{ p: 3, borderRadius: 4, mb: 4 }}>
-        <Typography variant="h5" fontWeight="bold" gutterBottom>
-          ⭐ Positive Themes
-        </Typography>
+      <Grid container spacing={2.5}>
+        <Grid size={{ xs: 12, lg: 6 }}>
+          <ClusterColumn eyebrow="Positive signals" title="What viewers value" clusters={result.positive_clusters} color="#168a45" tint="#f1faf4" />
+        </Grid>
+        <Grid size={{ xs: 12, lg: 6 }}>
+          <ClusterColumn eyebrow="Critical signals" title="Where viewers want more" clusters={result.negative_clusters} color="#e6213c" tint="#fff5f6" />
+        </Grid>
+      </Grid>
 
-        {Object.entries(positive_clusters || {}).map(([id, c]) => (
-          <Paper
-            key={id}
-            elevation={2}
-            sx={{
-              p: 3,
-              mb: 3,
-              borderRadius: 4,
-              background: "#e8f9f1",
-              borderLeft: "8px solid #4caf50",
-            }}
-          >
-            <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
-              {c.summary}
-            </Typography>
-
-            {c.examples.map((ex, idx) => (
-              <Typography
-                key={idx}
-                variant="body2"
-                sx={{ mb: 1, pl: 1.5, borderLeft: "3px solid #a5e6c5" }}
-              >
-                • {ex}
-              </Typography>
-            ))}
-          </Paper>
-        ))}
-      </Paper>
-
-      <Divider sx={{ my: 4 }} />
-
-      {/* ⚠ NEGATIVE THEMES */}
-      <Paper elevation={3} sx={{ p: 3, borderRadius: 4, mb: 4 }}>
-        <Typography variant="h5" fontWeight="bold" gutterBottom>
-          ⚠ Negative Themes
-        </Typography>
-
-        {Object.entries(negative_clusters || {}).map(([id, c]) => (
-          <Paper
-            key={id}
-            elevation={2}
-            sx={{
-              p: 3,
-              mb: 3,
-              borderRadius: 4,
-              background: "#ffebee",
-              borderLeft: "8px solid #f44336",
-            }}
-          >
-            <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
-              {c.summary}
-            </Typography>
-
-            {c.examples.map((ex, idx) => (
-              <Typography
-                key={idx}
-                variant="body2"
-                sx={{ mb: 1, pl: 1.5, borderLeft: "3px solid #f7b3b3" }}
-              >
-                • {ex}
-              </Typography>
-            ))}
-          </Paper>
-        ))}
-      </Paper>
-
-      <Divider sx={{ my: 4 }} />
-
-      {/* 💡 VIEWER SUGGESTIONS */}
-      <Paper
-        elevation={3}
-        sx={{
-          p: 3,
-          borderRadius: 4,
-          background: "linear-gradient(135deg, #fff7e0 0%, #ffffff 100%)",
-        }}
-      >
-        <Typography variant="h5" fontWeight="bold" gutterBottom>
-          💡 Viewer Suggestions & Requests
-        </Typography>
-
-        <Typography variant="body1" sx={{ mb: 2 }}>
-          {suggestions.overview}
-        </Typography>
-
-        {suggestions.examples.map((ex, idx) => (
-          <Typography
-            key={idx}
-            variant="body2"
-            sx={{ mb: 1, pl: 1.5, borderLeft: "3px solid #ffd699" }}
-          >
-            • {ex}
-          </Typography>
-        ))}
-      </Paper>
-    </Box>
+      {result.suggestions?.overview && (
+        <Paper sx={{ mt: 2.5, p: { xs: 2.5, md: 4 }, bgcolor: "#fffbf4", borderColor: "#f2dec1" }}>
+          <Typography variant="overline" sx={{ color: "#a95b05", fontWeight: 750 }}>Recommended focus</Typography>
+          <Typography variant="h4" mt={0.5} mb={1.25}>Audience requests</Typography>
+          <Typography color="text.secondary" sx={{ lineHeight: 1.75 }}>{result.suggestions.overview}</Typography>
+        </Paper>
+      )}
+    </Container>
   );
 }

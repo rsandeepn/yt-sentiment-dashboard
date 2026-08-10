@@ -1,25 +1,27 @@
 import { useEffect, useState } from "react";
 import {
+  Alert,
   Box,
-  Paper,
-  Typography,
-  TextField,
   Button,
   CircularProgress,
+  Container,
   Divider,
   LinearProgress,
-  Alert,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import HubRoundedIcon from "@mui/icons-material/HubRounded";
+import InsertChartOutlinedRoundedIcon from "@mui/icons-material/InsertChartOutlinedRounded";
+import LinkRoundedIcon from "@mui/icons-material/LinkRounded";
+import PictureAsPdfRoundedIcon from "@mui/icons-material/PictureAsPdfRounded";
 import { useNavigate } from "react-router-dom";
 import { useAnalysis } from "../context/useAnalysis";
-import { useAuth } from "../context/authContext";
 import api from "../api";
-
-import SummaryCard from "./summary/SummaryCard";
 import ExploreComments from "./ExploreComments";
-import Suggestioncard from "./summary/SuggestionCard";
 import StatsCharts from "./StatsCharts";
 import { analysisJobOutcome, isActiveAnalysis } from "../utils/analysisJobs";
 import { deriveInsights, downloadJSONReport, reportFilename } from "../utils/reportInsights";
@@ -28,15 +30,12 @@ export default function Dashboard() {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [exporting, setExporting] = useState(false);
-
   const { result, setResult, currentJob, setCurrentJob } = useAnalysis();
-  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const analysisIsActive = isActiveAnalysis(currentJob);
 
   useEffect(() => {
     if (!analysisIsActive || !currentJob?.id) return undefined;
-
     let cancelled = false;
     let timer;
     const poll = async () => {
@@ -50,16 +49,11 @@ export default function Dashboard() {
           return;
         }
         setCurrentJob(job);
-        if (analysisJobOutcome(job) === "poll") {
-          timer = window.setTimeout(poll, 1500);
-        }
+        if (analysisJobOutcome(job) === "poll") timer = window.setTimeout(poll, 1500);
       } catch (requestError) {
-        if (!cancelled) {
-          setError(requestError.response?.data?.detail || "Unable to check analysis progress.");
-        }
+        if (!cancelled) setError(requestError.response?.data?.detail || "Unable to check analysis progress.");
       }
     };
-
     poll();
     return () => {
       cancelled = true;
@@ -67,47 +61,41 @@ export default function Dashboard() {
     };
   }, [analysisIsActive, currentJob?.id, setCurrentJob, setResult]);
 
-  // -----------------------------------------
-  // ANALYZE VIDEO
-  // -----------------------------------------
   const analyzeVideo = async () => {
     if (!url.trim()) {
       setError("Please enter a YouTube URL.");
       return;
     }
-
     setError("");
     setResult(null);
     setCurrentJob(null);
-
     try {
       const response = await api.post("/analyses", { url });
       const job = response.data;
-      if (job.status === "completed") {
-        setResult(job.result);
-      } else {
-        setCurrentJob(job);
-      }
-    } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.detail || "Failed to analyze video.");
+      if (job.status === "completed") setResult(job.result);
+      else setCurrentJob(job);
+    } catch (requestError) {
+      setError(requestError.response?.data?.detail || "Failed to analyze video.");
     }
+  };
+
+  const onSubmit = (event) => {
+    event.preventDefault();
+    analyzeVideo();
   };
 
   const exportPDF = async () => {
     const section = document.getElementById("report-section");
     if (!section) return;
-
     setExporting(true);
     setError("");
     try {
-      const canvas = await html2canvas(section, {
-        scale: 2,
-        backgroundColor: "#ffffff",
-        useCORS: true,
-      });
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
+      const canvas = await html2canvas(section, { scale: 2, backgroundColor: "#ffffff", useCORS: true });
       const imgData = canvas.toDataURL("image/png");
-
       const pdf = new jsPDF("p", "mm", "a4");
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
@@ -115,271 +103,160 @@ export default function Dashboard() {
       const usablePageHeight = pageHeight - margin * 2;
       const imgWidth = pageWidth - margin * 2;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
       let renderedHeight = 0;
       while (renderedHeight < imgHeight) {
         if (renderedHeight > 0) pdf.addPage();
         pdf.addImage(imgData, "PNG", margin, margin - renderedHeight, imgWidth, imgHeight);
         renderedHeight += usablePageHeight;
       }
-
       pdf.save(reportFilename(result, "pdf"));
-    } catch (exportError) {
-      console.error(exportError);
+    } catch {
       setError("Unable to export this report. Please try again.");
     } finally {
       setExporting(false);
     }
   };
 
-  const exportJSON = () => {
-    downloadJSONReport(result);
-  };
-
   const insights = result ? deriveInsights(result) : null;
 
   return (
-    <Box
-      p={4}
-      sx={{
-        background: "linear-gradient(135deg, #eef1ff 0%, #ffffff 100%)",
-        minHeight: "100vh",
-      }}
-    >
-      {/* -----------------------------------------
-          HEADER SECTION
-      ------------------------------------------ */}
-      <Box textAlign="center" mb={4}>
-        <Box display="flex" justifyContent="flex-end" alignItems="center" gap={1} mb={2}>
-          <Typography variant="body2" color="text.secondary">{user.email}</Typography>
-          <Button variant="outlined" onClick={() => navigate("/history")}>History</Button>
-          <Button color="inherit" onClick={logout}>Logout</Button>
-        </Box>
-        <Typography variant="h3" fontWeight="800" gutterBottom>
-          🎬 YouTube Comment Analysis Dashboard
-        </Typography>
-
-        <Typography
-          color="text.secondary"
-          sx={{ maxWidth: "800px", mx: "auto", fontSize: "1.1rem" }}
-        >
-          Analyze multilingual YouTube comments powered by sentiment clustering.
-        </Typography>
-      </Box>
-
-      {/* -----------------------------------------
-          PREMIUM URL INPUT CARD
-      ------------------------------------------ */}
-      <Paper
+    <>
+      <Box
         sx={{
-          p: 4,
-          mb: 5,
-          borderRadius: 4,
-          backdropFilter: "blur(12px)",
-          background: "rgba(255,255,255,0.6)",
-          boxShadow: "0 8px 25px rgba(0,0,0,0.08)",
+          bgcolor: "#18181b",
+          color: "white",
+          position: "relative",
+          overflow: "hidden",
+          "&::after": {
+            content: '""',
+            position: "absolute",
+            width: 420,
+            height: 420,
+            borderRadius: "50%",
+            background: "rgba(230,33,60,0.18)",
+            filter: "blur(10px)",
+            top: -260,
+            right: -100,
+          },
         }}
       >
-        <Typography
-          variant="h6"
-          fontWeight="700"
-          sx={{ textAlign: "center", mb: 2 }}
-        >
-          🔗 Enter YouTube Video URL
-        </Typography>
-
-        <Box
-          mt={2}
-          display="flex"
-          gap={2}
-          justifyContent="center"
-          flexDirection={{ xs: "column", sm: "row" }}
-        >
-          <TextField
-            fullWidth
-            placeholder="https://youtube.com/..."
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            disabled={analysisIsActive}
-            sx={{
-              maxWidth: 700,
-              mx: "auto",
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "12px",
-              },
-            }}
-          />
-
-          <Button
-            variant="contained"
-            disabled={analysisIsActive}
-            onClick={analyzeVideo}
-            sx={{
-              px: 4,
-              borderRadius: "12px",
-              fontSize: "1rem",
-              fontWeight: "bold",
-            }}
-          >
-            {analysisIsActive ? <CircularProgress size={22} /> : "Analyze"}
-          </Button>
-        </Box>
-
-        {currentJob && (
-          <Box sx={{ maxWidth: 820, mx: "auto", mt: 3 }}>
-            {currentJob.status === "failed" ? (
-              <Alert severity="error">
-                {currentJob.error_message || "Analysis failed. Open History to retry."}
-              </Alert>
-            ) : (
-              <>
-                <Typography variant="body2" fontWeight={600} mb={1}>
-                  {currentJob.status_message || "Analysis in progress"} ({currentJob.progress}%)
-                </Typography>
-                <LinearProgress variant="determinate" value={currentJob.progress || 0} />
-                <Typography variant="caption" color="text.secondary">
-                  You can leave this page and reopen the analysis from History.
-                </Typography>
-              </>
-            )}
-          </Box>
-        )}
-
-        {error && (
-          <Typography mt={2} color="error" textAlign="center">
-            {error}
-          </Typography>
-        )}
-      </Paper>
-
-      {/* -----------------------------------------
-          RESULTS
-      ------------------------------------------ */}
-      {result && (
-        <Paper
-          sx={{
-            p: 4,
-            borderRadius: 4,
-            backdropFilter: "blur(10px)",
-            background: "rgba(255,255,255,0.7)",
-            boxShadow: "0 8px 25px rgba(0,0,0,0.08)",
-          }}
-        >
-          {/* ACTION BUTTONS */}
-          <Box display="flex" justifyContent="flex-end" flexWrap="wrap" gap={2} mb={3}>
-            {/* <Button
-              variant="outlined"
-              onClick={() => navigate("/themes")}
-              sx={{
-                borderRadius: "10px",
-                fontWeight: "600",
-                px: 3,
-              }}
-            >
-              🎯 View Themes
-            </Button> */}
-
-            <Button
-              variant="outlined"
-              onClick={() => navigate("/clusters")}
-              sx={{
-                borderRadius: "10px",
-                fontWeight: "600",
-                px: 3,
-              }}
-            >
-              🧩 View Clusters
-            </Button>
-
-            <Button
-              variant="outlined"
-              onClick={exportJSON}
-              sx={{ borderRadius: "10px", fontWeight: "700", px: 3 }}
-            >
-              Export JSON
-            </Button>
-
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={exportPDF}
-              disabled={exporting}
-              sx={{ borderRadius: "10px", fontWeight: "700", px: 3 }}
-            >
-              {exporting ? "Preparing PDF…" : "📄 Export PDF"}
-            </Button>
-          </Box>
-
-          <div id="report-section">
-            <Box mb={3}>
-              <Typography variant="h4" fontWeight={800}>YouTube Comment Analysis Report</Typography>
-              <Typography color="text.secondary">
-                {result.video?.id ? `Video ${result.video.id} · ` : ""}
-                Generated {new Date().toLocaleString()}
+        <Container maxWidth={false} sx={{ maxWidth: 1480, py: { xs: 7, md: 10 }, position: "relative", zIndex: 1 }}>
+          <Stack direction={{ xs: "column", lg: "row" }} spacing={{ xs: 5, lg: 9 }} alignItems={{ lg: "center" }}>
+            <Box sx={{ flex: 1, maxWidth: 720 }}>
+              <Typography variant="overline" sx={{ color: "#ff8b9b", fontWeight: 700, letterSpacing: "0.14em" }}>
+                Multilingual audience intelligence
+              </Typography>
+              <Typography variant="h1" sx={{ mt: 1, mb: 2 }}>
+                Understand what your audience is really saying.
+              </Typography>
+              <Typography sx={{ color: "#bcbcc2", fontSize: { xs: "1rem", md: "1.12rem" }, maxWidth: 620, lineHeight: 1.7 }}>
+                Turn YouTube comments into clear sentiment, recurring themes, top keywords, and practical content ideas—in one focused report.
               </Typography>
             </Box>
-            {/* -----------------------------------------
-                SIMPLE OVERVIEW (PREMIUM LOOK)
-            ------------------------------------------ */}
-            <SummaryCard
-              title="High-Level Summary"
-              icon="🧠"
-              color="#8854d0"
-              data={{
-                stats: {
-                  total: result.stats.total,
-                  positive: result.stats.positive,
-                  negative: result.stats.negative,
-                  neutral: result.stats.neutral,
-                  suggestions: result.stats.suggestions,
 
-                  posPct: insights.positive_percentage.toFixed(1),
-                  negPct: insights.negative_percentage.toFixed(1),
-                  neuPct: insights.neutral_percentage.toFixed(1),
-                },
-                text: "",
-              }}
-            />
-            <SummaryCard title="Simple Overview" icon="🧾" color="#4b7bec">
-              {result.overview}
-            </SummaryCard>
+            <Paper component="form" onSubmit={onSubmit} sx={{ flex: 1, width: "100%", maxWidth: 620, p: { xs: 2.5, sm: 3.5 }, border: 0, boxShadow: "0 24px 70px rgba(0,0,0,0.32)" }}>
+              <Stack direction="row" alignItems="center" spacing={1} mb={1}>
+                <LinkRoundedIcon color="primary" />
+                <Typography variant="h5" color="text.primary">Analyze a YouTube video</Typography>
+              </Stack>
+              <Typography variant="body2" color="text.secondary" mb={2.5}>
+                Paste a public video link to create a new audience report.
+              </Typography>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
+                <TextField
+                  fullWidth
+                  aria-label="YouTube video URL"
+                  placeholder="https://youtube.com/watch?v=..."
+                  value={url}
+                  onChange={(event) => setUrl(event.target.value)}
+                  disabled={analysisIsActive}
+                />
+                <Button type="submit" variant="contained" disabled={analysisIsActive} endIcon={!analysisIsActive && <ArrowForwardRoundedIcon />} sx={{ whiteSpace: "nowrap", minWidth: 150 }}>
+                  {analysisIsActive ? <CircularProgress size={22} color="inherit" /> : "Analyze video"}
+                </Button>
+              </Stack>
 
-            <Divider sx={{ my: 4 }} />
+              {currentJob && (
+                <Box sx={{ mt: 2.5 }}>
+                  {currentJob.status === "failed" ? (
+                    <Alert severity="error">{currentJob.error_message || "Analysis failed. Open History to retry."}</Alert>
+                  ) : (
+                    <>
+                      <Stack direction="row" justifyContent="space-between" mb={1}>
+                        <Typography variant="body2" fontWeight={650}>{currentJob.status_message || "Analysis in progress"}</Typography>
+                        <Typography variant="body2" color="text.secondary">{currentJob.progress || 0}%</Typography>
+                      </Stack>
+                      <LinearProgress variant="determinate" value={currentJob.progress || 0} sx={{ height: 7, borderRadius: 10 }} />
+                    </>
+                  )}
+                </Box>
+              )}
+              {error && <Alert severity="error" sx={{ mt: 2.5 }}>{error}</Alert>}
+            </Paper>
+          </Stack>
+        </Container>
+      </Box>
 
-            {/* -----------------------------------------
-                STATS CHARTS
-            ------------------------------------------ */}
-            <StatsCharts stats={result.stats} insights={insights} />
-
-            {/* ⭐ VIEWER SUGGESTIONS (Premium UI Added Back) */}
-            {result?.suggestions && (
-              <Suggestioncard suggestions={result.suggestions} />
-            )}
-            <Divider sx={{ my: 4 }} />
-          </div>
-          {/* -----------------------------------------
-              EXPLORE COMMENTS (PREMIUM)
-          ------------------------------------------ */}
-          <Paper
-            sx={{
-              p: 3,
-              borderRadius: 3,
-              background: "rgba(245,245,255,0.6)",
-              boxShadow: "0 4px 18px rgba(0,0,0,0.06)",
-            }}
-          >
-            <Typography variant="h5" fontWeight="700" gutterBottom>
-              🔍 Explore Viewer Comments
-            </Typography>
-
-            <Typography color="text.secondary" sx={{ mb: 2 }}>
-              Search, filter and navigate through all viewer reactions.
-            </Typography>
-
-            <ExploreComments />
-          </Paper>
-        </Paper>
+      {!result && !currentJob && (
+        <Container maxWidth={false} sx={{ maxWidth: 1480, py: { xs: 6, md: 9 } }}>
+          <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
+            {[
+              ["01", "Sentiment distribution", "See the balance of positive, neutral, and negative reactions at a glance."],
+              ["02", "Keywords & themes", "Find the topics and phrases your viewers repeat most often."],
+              ["03", "Audience suggestions", "Surface requests and improvement ideas you can act on next."],
+            ].map(([number, title, copy]) => (
+              <Paper key={number} sx={{ p: 3.5, flex: 1, minHeight: 210 }}>
+                <Typography variant="overline" color="primary" fontWeight={750}>{number}</Typography>
+                <Typography variant="h4" mt={3} mb={1.25}>{title}</Typography>
+                <Typography color="text.secondary" lineHeight={1.7}>{copy}</Typography>
+              </Paper>
+            ))}
+          </Stack>
+        </Container>
       )}
-    </Box>
+
+      {result && (
+        <Container maxWidth={false} sx={{ maxWidth: 1480, py: { xs: 4, md: 6 } }}>
+          <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems={{ md: "flex-end" }} spacing={2} mb={3}>
+            <Box>
+              <Typography variant="overline" color="primary" fontWeight={750}>Analysis report</Typography>
+              <Typography variant="h2" mt={0.5}>Audience insights</Typography>
+              <Typography color="text.secondary" mt={1}>
+                {result.video?.id ? `Video ${result.video.id} · ` : ""}Generated {new Date().toLocaleString()}
+              </Typography>
+            </Box>
+            <Stack direction="row" flexWrap="wrap" gap={1}>
+              <Button variant="outlined" color="secondary" startIcon={<HubRoundedIcon />} onClick={() => navigate("/clusters")}>Detailed themes</Button>
+              <Button variant="outlined" color="secondary" startIcon={<DownloadRoundedIcon />} onClick={() => downloadJSONReport(result)}>JSON</Button>
+              <Button variant="contained" startIcon={<PictureAsPdfRoundedIcon />} onClick={exportPDF} disabled={exporting}>
+                {exporting ? "Preparing…" : "Export PDF"}
+              </Button>
+            </Stack>
+          </Stack>
+
+          <Paper sx={{ p: { xs: 2.5, md: 4 } }} id="report-section">
+            <Stack direction="row" alignItems="center" spacing={1.25} mb={3}>
+              <InsertChartOutlinedRoundedIcon color="primary" />
+              <Typography variant="h4">Report overview</Typography>
+            </Stack>
+            {result.overview && (
+              <Box sx={{ bgcolor: "#f6f6f4", borderRadius: 2.5, p: 2.5, mb: 3 }}>
+                <Typography variant="overline" color="text.secondary" fontWeight={700}>Executive summary</Typography>
+                <Typography sx={{ whiteSpace: "pre-line", mt: 0.75, lineHeight: 1.75 }}>{result.overview}</Typography>
+              </Box>
+            )}
+            <StatsCharts stats={result.stats} insights={insights} />
+          </Paper>
+
+          <Divider sx={{ my: 5 }} />
+          <Box>
+            <Typography variant="overline" color="primary" fontWeight={750}>Comment explorer</Typography>
+            <Typography variant="h3" mt={0.5}>Hear the individual voices</Typography>
+            <Typography color="text.secondary" mt={1} mb={3}>Search, compare, and review the comments behind the report.</Typography>
+            <ExploreComments />
+          </Box>
+        </Container>
+      )}
+    </>
   );
 }

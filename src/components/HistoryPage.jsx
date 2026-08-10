@@ -5,6 +5,7 @@ import {
   Button,
   Chip,
   CircularProgress,
+  Container,
   MenuItem,
   Pagination,
   Paper,
@@ -12,6 +13,12 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
+import RefreshRoundedIcon from "@mui/icons-material/RefreshRounded";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
 import { useAnalysis } from "../context/useAnalysis";
@@ -115,23 +122,25 @@ export default function HistoryPage() {
   };
 
   return (
-    <Box sx={{ maxWidth: 1100, mx: "auto", p: { xs: 2, sm: 4 } }}>
-      <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" gap={2} mb={3}>
+    <Container maxWidth={false} sx={{ maxWidth: 1480, py: { xs: 4, md: 7 } }}>
+      <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ sm: "flex-end" }} gap={2} mb={4}>
         <Box>
-          <Typography variant="h4" fontWeight={700}>Analysis History</Typography>
-          <Typography color="text.secondary">Track progress, reopen results, retry, or analyze again.</Typography>
+          <Typography variant="overline" color="primary" fontWeight={750}>Report library</Typography>
+          <Typography variant="h2" mt={0.5}>Analysis history</Typography>
+          <Typography color="text.secondary" mt={1}>Track progress, reopen reports, or run a fresh analysis.</Typography>
         </Box>
-        <Button variant="outlined" onClick={() => navigate("/")}>Back to Dashboard</Button>
+        <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => navigate("/")}>New analysis</Button>
       </Stack>
 
-      <Paper sx={{ p: 2, mb: 3 }}>
+      <Paper sx={{ p: { xs: 2, md: 2.5 }, mb: 2.5 }}>
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
           <TextField
             fullWidth
             size="small"
-            label="Search by video ID or URL"
+            placeholder="Search by video ID or URL"
             value={search}
             onChange={(event) => { setSearch(event.target.value); setPage(1); }}
+            slotProps={{ input: { startAdornment: <SearchRoundedIcon sx={{ mr: 1, color: "text.secondary" }} /> } }}
           />
           <TextField
             select
@@ -154,17 +163,18 @@ export default function HistoryPage() {
       {loading ? (
         <Box textAlign="center" py={6}><CircularProgress /></Box>
       ) : items.length === 0 ? (
-        <Paper sx={{ p: 4, textAlign: "center" }}>
-          <Typography color="text.secondary">No analyses match the current filters.</Typography>
+        <Paper sx={{ p: 7, textAlign: "center", bgcolor: "#fafaf9" }}>
+          <Typography variant="h5">No reports found</Typography>
+          <Typography color="text.secondary" mt={1}>Try changing the filters or analyze a new video.</Typography>
         </Paper>
       ) : (
-        <Stack spacing={2}>
+        <Stack spacing={1.5}>
           {items.map((item) => (
-            <Paper key={item.id} sx={{ p: 3 }}>
+            <Paper key={item.id} sx={{ p: { xs: 2.25, md: 3 }, transition: "border-color 160ms ease, transform 160ms ease", "&:hover": { borderColor: "#c8c8c3", transform: "translateY(-1px)" } }}>
               <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" gap={2}>
                 <Box sx={{ minWidth: 0 }}>
                   <Stack direction="row" alignItems="center" spacing={1} mb={0.5}>
-                    <Typography fontWeight={700}>Video {item.video_id}</Typography>
+                    <Typography variant="h6">Video {item.video_id}</Typography>
                     <Chip
                       size="small"
                       label={item.status}
@@ -178,7 +188,7 @@ export default function HistoryPage() {
                     {new Date(item.created_at).toLocaleString()}
                   </Typography>
                   {item.status_message && item.status !== "completed" && (
-                    <Typography variant="body2" mt={1}>{item.status_message} · {item.progress}%</Typography>
+                    <Typography variant="body2" mt={1} fontWeight={600}>{item.status_message} · {item.progress}%</Typography>
                   )}
                   {item.error_message && (
                     <Typography variant="body2" color="error" mt={1}>{item.error_message}</Typography>
@@ -187,12 +197,12 @@ export default function HistoryPage() {
                 <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
                   {item.status === "completed" && (
                     <>
-                      <Button variant="contained" onClick={() => openAnalysis(item)}>Open Results</Button>
-                      <Button variant="outlined" onClick={() => startJob(`/analyses/${item.id}/reanalyze`)}>
+                      <Button variant="contained" startIcon={<OpenInNewRoundedIcon />} onClick={() => openAnalysis(item)}>Open report</Button>
+                      <Button variant="outlined" color="secondary" startIcon={<RefreshRoundedIcon />} onClick={() => startJob(`/analyses/${item.id}/reanalyze`)}>
                         Analyze Again
                       </Button>
-                      <Button variant="outlined" onClick={() => downloadAnalysis(item)}>
-                        Download JSON
+                      <Button color="secondary" startIcon={<DownloadRoundedIcon />} onClick={() => downloadAnalysis(item)}>
+                        JSON
                       </Button>
                     </>
                   )}
@@ -203,7 +213,7 @@ export default function HistoryPage() {
                     <Button variant="contained" onClick={() => startJob(`/analyses/${item.id}/retry`)}>Retry</Button>
                   )}
                   {!isActiveAnalysis(item) && (
-                    <Button color="error" onClick={() => deleteAnalysis(item)}>Delete</Button>
+                    <Button color="error" startIcon={<DeleteOutlineRoundedIcon />} onClick={() => deleteAnalysis(item)}>Delete</Button>
                   )}
                 </Stack>
               </Stack>
@@ -217,6 +227,6 @@ export default function HistoryPage() {
           <Pagination count={totalPages} page={page} onChange={(_event, value) => setPage(value)} />
         </Stack>
       )}
-    </Box>
+    </Container>
   );
 }

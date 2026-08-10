@@ -1,151 +1,71 @@
-// import { useState } from "react";
-// import { Paper, Typography, Box, Chip, Button, Collapse } from "@mui/material";
-
-// export default function SuggestionCard({ suggestions }) {
-//   if (!suggestions) return null;
-
-//   const [open, setOpen] = useState(false);
-
-//   const clusterEntries = Object.entries(suggestions.clusters || {});
-//   const sampleComments = suggestions.examples || [];
-
-//   return (
-//     <Paper
-//       sx={{
-//         p: 3,
-//         mt: 3,
-//         borderRadius: 3,
-//         background: "#fff8e1",
-//         borderLeft: "6px solid #ff9800",
-//       }}
-//       elevation={2}
-//     >
-//       {/* Header */}
-//       <Typography variant="h6" fontWeight="bold" gutterBottom>
-//         💡 Viewer Suggestions & Improvement Ideas
-//       </Typography>
-
-//       <Typography variant="body1" sx={{ mb: 2 }}>
-//         {suggestions.overview}
-//       </Typography>
-
-//       {/* Suggestion THEMES */}
-//       {clusterEntries.length > 0 && (
-//         <>
-//           <Typography variant="subtitle1" fontWeight="600" gutterBottom>
-//             Key Improvement Themes:
-//           </Typography>
-
-//           {clusterEntries.map(([id, cluster]) => (
-//             <Paper
-//               key={id}
-//               sx={{
-//                 p: 2,
-//                 px: 3,
-//                 mb: 2,
-//                 background: "#fff3cd",
-//                 borderRadius: 2,
-//               }}
-//             >
-//               <Typography variant="subtitle2" fontWeight="bold">
-//                 🔸 Theme {Number(id) + 1}: {cluster.summary}
-//               </Typography>
-//             </Paper>
-//           ))}
-//         </>
-//       )}
-
-//       {/* Expandable comments */}
-//       <Button variant="outlined" onClick={() => setOpen(!open)} sx={{ mt: 2 }}>
-//         {open ? "Hide Comments" : "Show Related Comments"}
-//       </Button>
-
-//       <Collapse in={open}>
-//         <Box sx={{ mt: 2 }}>
-//           <Typography variant="subtitle1" fontWeight="600" gutterBottom>
-//             📌 Sample Viewer Comments
-//           </Typography>
-
-//           {sampleComments.map((c, idx) => (
-//             <Typography
-//               key={idx}
-//               variant="body2"
-//               sx={{ mb: 0.8, pl: 1, borderLeft: "2px solid #ffcc80" }}
-//             >
-//               • {c}
-//             </Typography>
-//           ))}
-//         </Box>
-//       </Collapse>
-//     </Paper>
-//   );
-// }
-
 import { useState } from "react";
-import { Paper, Typography, Button, Collapse, Box } from "@mui/material";
+import { Box, Button, Collapse, Grid, Paper, Stack, Typography } from "@mui/material";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import LightbulbRoundedIcon from "@mui/icons-material/LightbulbRounded";
+import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
 
-export default function PremiumSuggestionCard({ suggestions }) {
+export default function SuggestionCard({ suggestions, onOpen, expanded = false }) {
   const [open, setOpen] = useState(false);
-
   if (!suggestions) return null;
 
+  const clusters = Object.values(suggestions.clusters || {});
+  const examples = suggestions.examples || [];
+
   return (
-    <Paper
-      sx={{
-        p: 3,
-        mt: 4,
-        borderRadius: 4,
-        background: "linear-gradient(135deg, #fff8dc, #ffffff)",
-        boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
-        borderLeft: "6px solid #ffb300",
-      }}
-    >
-      {/* TITLE */}
-      <Typography variant="h5" fontWeight="700" gutterBottom>
-        💡 Viewer Suggestions & Improvement Ideas
-      </Typography>
-
-      {/* OVERVIEW */}
-      <Typography variant="body1" sx={{ mb: 2 }}>
-        {suggestions.overview}
-      </Typography>
-
-      {/* TOGGLE BUTTON */}
-      <Button
-        variant="outlined"
-        onClick={() => setOpen(!open)}
-        sx={{
-          mt: 1,
-          borderRadius: 2,
-          textTransform: "none",
-          fontWeight: 600,
-        }}
-      >
-        {open ? "Hide Related Comments" : "Show Related Comments"}
-      </Button>
-
-      {/* EXPANDABLE COMMENT LIST */}
-      <Collapse in={open}>
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="subtitle1" fontWeight="600" gutterBottom>
-            📌 Sample Viewer Comments
+    <Paper sx={{ p: { xs: 2.5, md: 3.5 }, mt: 2.5, bgcolor: "#fff7f8", borderColor: "#f0d7dc", boxShadow: "0 10px 30px rgba(80,24,36,0.04)" }}>
+      <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ sm: "flex-start" }} spacing={2}>
+        <Box sx={{ maxWidth: 780 }}>
+          <Stack direction="row" alignItems="center" spacing={1} mb={1}>
+            <Box sx={{ width: 34, height: 34, display: "grid", placeItems: "center", borderRadius: 2, bgcolor: "#fce8ec" }}>
+              <LightbulbRoundedIcon sx={{ color: "#c51630", fontSize: 20 }} />
+            </Box>
+            <Typography variant="overline" sx={{ color: "text.secondary", fontWeight: 750 }}>Actionable insight</Typography>
+          </Stack>
+          <Typography variant="h4">Audience suggestions</Typography>
+          <Typography color="text.secondary" sx={{ mt: 1, lineHeight: 1.75 }}>
+            {suggestions.overview || "Review the most common viewer requests and improvement ideas."}
           </Typography>
-
-          {suggestions.examples.map((text, idx) => (
-            <Typography
-              key={idx}
-              variant="body2"
-              sx={{
-                mb: 1,
-                pl: 1,
-                borderLeft: "2px solid #ffcc80",
-                lineHeight: 1.6,
-              }}
-            >
-              • {text}
-            </Typography>
-          ))}
         </Box>
+        {onOpen ? (
+          <Button variant="outlined" color="secondary" onClick={onOpen} sx={{ flexShrink: 0 }}>
+            View all suggestions
+          </Button>
+        ) : examples.length > 0 && (
+          <Button
+            variant="outlined"
+            color="secondary"
+            startIcon={open ? <RemoveRoundedIcon /> : <AddRoundedIcon />}
+            onClick={() => setOpen(!open)}
+            sx={{ flexShrink: 0 }}
+          >
+            {open ? "Hide comments" : "View examples"}
+          </Button>
+        )}
+      </Stack>
+
+      {clusters.length > 0 && (
+        <Grid container spacing={1.5} mt={1.5}>
+          {clusters.slice(0, 6).map((cluster, index) => (
+            <Grid key={`${cluster.summary}-${index}`} size={{ xs: 12, md: 6 }}>
+              <Box sx={{ bgcolor: "rgba(255,255,255,0.82)", border: "1px solid #f0d7dc", borderRadius: 2, p: 2, height: "100%" }}>
+                <Typography variant="caption" color="text.secondary">Theme {index + 1}</Typography>
+                <Typography fontWeight={650} mt={0.5}>{cluster.summary}</Typography>
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
+      )}
+
+      <Collapse in={expanded || open}>
+        <Grid container spacing={1.5} mt={2}>
+          {examples.map((text, index) => (
+            <Grid key={`${text}-${index}`} size={{ xs: 12, md: 6 }}>
+              <Box sx={{ bgcolor: "rgba(255,255,255,0.82)", borderRadius: 2, border: "1px solid #f0d7dc", p: 2, height: "100%" }}>
+                <Typography variant="body2" sx={{ lineHeight: 1.65 }}>“{text}”</Typography>
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
       </Collapse>
     </Paper>
   );

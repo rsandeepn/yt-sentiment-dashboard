@@ -2,54 +2,77 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext";
 import {
-  Card,
-  CardContent,
   TextField,
   Button,
   Typography,
-  Box,
   Alert,
+  Stack,
 } from "@mui/material";
+import AuthPageShell from "./AuthPageShell";
+import GoogleSignInButton from "./GoogleSignInButton";
 
 export default function Register() {
   const navigate = useNavigate();
   const { register } = useAuth();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
     setError("");
+    if (form.password !== form.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
     setLoading(true);
-    const result = await register(form.email, form.password);
+    const result = await register({
+      first_name: form.firstName,
+      last_name: form.lastName,
+      email: form.email,
+      password: form.password,
+      confirm_password: form.confirmPassword,
+    });
     setLoading(false);
     if (result.success) navigate("/");
     else setError(result.message);
   };
 
   return (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      height="90vh"
-    >
-      <Card sx={{ width: 380, p: 2 }}>
-        <CardContent>
-          <Typography variant="h5" mb={2}>
-            Create Account
-          </Typography>
-
-          {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
-
+    <AuthPageShell eyebrow="Get started" title="Create your account" subtitle="Build multilingual audience reports and keep every analysis organized.">
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
           <form onSubmit={submit}>
+            <Stack spacing={2.25}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+              <TextField
+                label="First name"
+                required
+                fullWidth
+                autoComplete="given-name"
+                value={form.firstName}
+                onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+              />
+              <TextField
+                label="Last name"
+                required
+                fullWidth
+                autoComplete="family-name"
+                value={form.lastName}
+                onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+              />
+            </Stack>
             <TextField
-              label="Email"
+              label="Email ID"
               type="email"
               required
               fullWidth
-              margin="normal"
+              autoComplete="email"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
             />
@@ -60,22 +83,36 @@ export default function Register() {
               required
               helperText="Use at least 8 characters."
               inputProps={{ minLength: 8 }}
+              autoComplete="new-password"
               fullWidth
-              margin="normal"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
 
-            <Button type="submit" variant="contained" fullWidth disabled={loading} sx={{ mt: 2 }}>
+            <TextField
+              label="Confirm password"
+              type="password"
+              required
+              inputProps={{ minLength: 8 }}
+              autoComplete="new-password"
+              error={Boolean(form.confirmPassword && form.password !== form.confirmPassword)}
+              helperText={form.confirmPassword && form.password !== form.confirmPassword ? "Passwords do not match." : " "}
+              fullWidth
+              value={form.confirmPassword}
+              onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+            />
+
+            <Button type="submit" variant="contained" fullWidth disabled={loading} size="large">
               {loading ? "Creating account..." : "Register"}
             </Button>
+            </Stack>
           </form>
 
-          <Typography variant="body2" mt={2}>
+          <GoogleSignInButton onAuthenticated={() => navigate("/")} />
+
+          <Typography variant="body2" mt={3} color="text.secondary">
             Already have an account? <Link to="/login">Login</Link>
           </Typography>
-        </CardContent>
-      </Card>
-    </Box>
+    </AuthPageShell>
   );
 }

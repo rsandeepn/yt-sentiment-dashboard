@@ -4,11 +4,14 @@ import {
   Paper,
   Typography,
   TextField,
+  InputAdornment,
   Chip,
   Grid,
   Pagination,
 } from "@mui/material";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import { useAnalysis } from "../context/useAnalysis";
+import { createCommentSearch } from "../utils/commentSearch";
 
 const HighlightedText = ({ text, term }) => {
   const query = term.trim();
@@ -46,22 +49,18 @@ const PremiumCommentCard = ({ text, sentiment }) => {
     <Paper
       sx={{
         p: 2,
-        borderRadius: 4,
-        mb: 2,
+        borderRadius: 2,
+        mb: 1.25,
         display: "flex",
         alignItems: "flex-start",
         gap: 2,
-        background: isPositive
-          ? "linear-gradient(135deg, #E8FFF3, #FFFFFF)"
-          : isNegative
-            ? "linear-gradient(135deg, #FFF0F0, #FFFFFF)"
-            : "linear-gradient(135deg, #F7F7F7, #FFFFFF)",
+        background: "#ffffff",
         borderLeft: isPositive
-          ? "6px solid #2ecc71"
+          ? "3px solid #168a45"
           : isNegative
-            ? "6px solid #e74c3c"
-            : "6px solid #b2bec3",
-        boxShadow: "0 6px 16px rgba(0,0,0,0.08)",
+            ? "3px solid #e6213c"
+            : "3px solid #d97706",
+        boxShadow: "none",
         maxWidth: "100%",
       }}
     >
@@ -70,12 +69,12 @@ const PremiumCommentCard = ({ text, sentiment }) => {
         sx={{
           width: 38,
           height: 38,
-          borderRadius: "50%",
+          borderRadius: "9px",
           background: isPositive
-            ? "#2ecc71"
+            ? "#168a45"
             : isNegative
-              ? "#e74c3c"
-              : "#b2bec3",
+              ? "#e6213c"
+              : "#d97706",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -83,10 +82,10 @@ const PremiumCommentCard = ({ text, sentiment }) => {
           fontWeight: "bold",
           fontSize: "1.1rem",
           flexShrink: 0,
-          boxShadow: "0 3px 10px rgba(0,0,0,0.15)",
+          boxShadow: "none",
         }}
       >
-        {isPositive ? "👍" : isNegative ? "⚠️" : "💬"}
+        {isPositive ? "+" : isNegative ? "−" : "="}
       </Box>
 
       {/* TEXT */}
@@ -95,7 +94,7 @@ const PremiumCommentCard = ({ text, sentiment }) => {
         sx={{
           fontSize: "0.95rem",
           lineHeight: 1.6,
-          color: "#2d3436",
+          color: "#343438",
           wordBreak: "break-word",
         }}
       >
@@ -119,15 +118,14 @@ export default function ExploreComments() {
   const commentsPerPage = 6;
 
   const allComments = useMemo(() => result?.all_comments || [], [result]);
+  const commentSearch = useMemo(() => createCommentSearch(allComments), [allComments]);
 
   // ------------------------------------------------------------
   // SEARCH FILTER
   // ------------------------------------------------------------
   const searchResults = useMemo(() => {
-    const t = searchTerm.trim().toLowerCase();
-    if (!t) return [];
-    return allComments.filter((c) => c.text.toLowerCase().includes(t));
-  }, [searchTerm, allComments]);
+    return commentSearch(searchTerm);
+  }, [searchTerm, commentSearch]);
 
   // ------------------------------------------------------------
   // TOP POSITIVE / NEGATIVE
@@ -173,35 +171,71 @@ export default function ExploreComments() {
           <Paper
             sx={{
               width: "100%",
-              p: 3,
+              p: { xs: 2, md: 2.5 },
               boxSizing: "border-box",
+              background: "#fff7f8",
+              border: "1px solid #f0d7dc",
             }}
           >
-            <Typography variant="h6" fontWeight="700" sx={{ mb: 2 }}>
-              🔍 Search by Keyword
-            </Typography>
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="h6" fontWeight="700">
+                Search comments
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.35 }}>
+                Quickly find audience feedback across every analyzed comment.
+              </Typography>
+            </Box>
 
             <TextField
               fullWidth
-              placeholder="Search (hero, bgm, boring, song...)"
+              placeholder="Search comments by topic, phrase, or language..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchRoundedIcon sx={{ color: "#c51630" }} />
+                    </InputAdornment>
+                  ),
+                },
+                htmlInput: {
+                  "aria-label": "Search analyzed comments",
+                },
+              }}
               sx={{
                 width: "100%",
                 "& .MuiOutlinedInput-root": {
-                  height: "48px",
+                  height: "52px",
                   borderRadius: "10px",
                   fontSize: "1rem",
+                  backgroundColor: "#ffffff",
+                  boxShadow: "0 4px 14px rgba(24, 24, 27, 0.06)",
+                  transition: "box-shadow 160ms ease, background-color 160ms ease",
+                  "& fieldset": {
+                    borderColor: "#9a9a9f",
+                    borderWidth: "1.5px",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#68686f",
+                  },
+                  "&.Mui-focused": {
+                    boxShadow: "0 0 0 4px rgba(230, 33, 60, 0.12)",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#e6213c",
+                    borderWidth: "2px",
+                  },
                 },
               }}
             />
 
-            <Typography variant="body2" sx={{ mt: 2 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
               {searchTerm && searchResults.length > 0
                 ? `Found ${searchResults.length} comments`
                 : searchTerm
                   ? "No matching comments"
-                  : "Start typing to search"}
+                  : "Spelling variations and transliterated words are supported."}
             </Typography>
 
             <Box sx={{ mt: 2 }}>
@@ -222,14 +256,14 @@ export default function ExploreComments() {
         <Grid size={{ xs: 12 }} sx={{ width: "100%" }}>
           <Paper
             sx={{
-              p: 3,
-              borderRadius: 4,
-              background: "linear-gradient(135deg, #FFF8E8, #FFFFFF)",
-              boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
+              p: { xs: 2, md: 2.5 },
+              borderRadius: 3,
+              background: "#ffffff",
+              boxShadow: "none",
             }}
           >
             <Typography variant="h6" fontWeight="700" sx={{ mb: 2 }}>
-              ⭐ Top Positive & ⚠️ Top Negative
+              Comment highlights
             </Typography>
 
             {/* Inputs */}
@@ -269,7 +303,7 @@ export default function ExploreComments() {
                   fontWeight="bold"
                   sx={{ mb: 1 }}
                 >
-                  ⭐ Positive
+                  Most positive
                 </Typography>
 
                 <Box>
@@ -286,7 +320,7 @@ export default function ExploreComments() {
               {/* NEGATIVE */}
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Typography color="error.main" fontWeight="bold" sx={{ mb: 1 }}>
-                  ⚠️ Negative
+                  Most critical
                 </Typography>
 
                 <Box>
@@ -309,15 +343,15 @@ export default function ExploreComments() {
       ========================================================= */}
       <Paper
         sx={{
-          p: 3,
+          p: { xs: 2, md: 2.5 },
           mt: 4,
-          borderRadius: 4,
-          background: "linear-gradient(135deg, #FAFAFA, #FFFFFF)",
-          boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
+          borderRadius: 3,
+          background: "#ffffff",
+          boxShadow: "none",
         }}
       >
         <Typography variant="h6" fontWeight="700" sx={{ mb: 2 }}>
-          📜 All Comments ({allComments.length})
+          All comments ({allComments.length})
         </Typography>
 
         {/* Top Pagination */}
