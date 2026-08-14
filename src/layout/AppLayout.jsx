@@ -66,7 +66,7 @@ export default function AppLayout({ children }) {
       >
         <Container maxWidth={false} sx={{ maxWidth: 1480 }}>
           <Toolbar disableGutters sx={{ minHeight: { xs: 64, md: 72 }, gap: 3 }}>
-            <Box onClick={() => go("/")} sx={{ cursor: "pointer", flexShrink: 0 }}>
+            <Box onClick={() => go("/analyze")} sx={{ cursor: "pointer", flexShrink: 0 }}>
               <BrandMark />
             </Box>
 
@@ -74,8 +74,8 @@ export default function AppLayout({ children }) {
               <Button
                 color="secondary"
                 startIcon={<InsightsRoundedIcon />}
-                onClick={() => go("/")}
-                sx={{ bgcolor: location.pathname === "/" ? "#f1f1ef" : "transparent" }}
+                onClick={() => go("/analyze")}
+                sx={{ bgcolor: location.pathname === "/analyze" ? "#f1f1ef" : "transparent" }}
               >
                 Analyze
               </Button>
@@ -124,8 +124,8 @@ export default function AppLayout({ children }) {
           >
             <Button
               color="secondary"
-              onClick={() => go("/")}
-              sx={{ bgcolor: location.pathname === "/" ? "#f1f1ef" : "transparent", flexShrink: 0 }}
+              onClick={() => go("/analyze")}
+              sx={{ bgcolor: location.pathname === "/analyze" ? "#f1f1ef" : "transparent", flexShrink: 0 }}
             >
               Analyze
             </Button>

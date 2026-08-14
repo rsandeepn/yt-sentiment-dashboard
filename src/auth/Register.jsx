@@ -40,7 +40,7 @@ export default function Register() {
       confirm_password: form.confirmPassword,
     });
     setLoading(false);
-    if (result.success) navigate("/");
+    if (result.success) navigate("/analyze");
     else setError(result.message);
   };
 
@@ -108,7 +108,7 @@ export default function Register() {
             </Stack>
           </form>
 
-          <GoogleSignInButton onAuthenticated={() => navigate("/")} />
+          <GoogleSignInButton onAuthenticated={() => navigate("/analyze")} />
 
           <Typography variant="body2" mt={3} color="text.secondary">
             Already have an account? <Link to="/login">Login</Link>
