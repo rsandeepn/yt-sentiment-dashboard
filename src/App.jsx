@@ -9,6 +9,7 @@ import ClustersPage from "./components/ClustersPage";
 import HistoryPage from "./components/HistoryPage";
 import SuggestionsPage from "./components/SuggestionsPage";
 import AppLayout from "./layout/AppLayout";
+import LandingPage from "./pages/LandingPage";
 
 function ProtectedPage({ children }) {
   return (
@@ -22,47 +23,15 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-          {/* Protected Dashboard */}
-          <Route
-            path="/"
-            element={
-              <ProtectedPage><Dashboard /></ProtectedPage>
-            }
-          />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/analyze" element={<ProtectedPage><Dashboard /></ProtectedPage>} />
+        <Route path="/themes" element={<ProtectedPage><ThemePage /></ProtectedPage>} />
+        <Route path="/clusters" element={<ProtectedPage><ClustersPage /></ProtectedPage>} />
+        <Route path="/history" element={<ProtectedPage><HistoryPage /></ProtectedPage>} />
+        <Route path="/suggestions" element={<ProtectedPage><SuggestionsPage /></ProtectedPage>} />
 
-          {/* Themes page */}
-          <Route
-            path="/themes"
-            element={
-              <ProtectedPage><ThemePage /></ProtectedPage>
-            }
-          />
-
-          {/* Clusters page */}
-          <Route
-            path="/clusters"
-            element={
-              <ProtectedPage><ClustersPage /></ProtectedPage>
-            }
-          />
-
-          <Route
-            path="/history"
-            element={
-              <ProtectedPage><HistoryPage /></ProtectedPage>
-            }
-          />
-
-          <Route
-            path="/suggestions"
-            element={
-              <ProtectedPage><SuggestionsPage /></ProtectedPage>
-            }
-          />
-
-          {/* Public auth routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     </BrowserRouter>
   );

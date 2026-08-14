@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /analyze
+Disallow: /themes
+Disallow: /clusters
+Disallow: /history
+Disallow: /suggestions
+
+Sitemap: https://analyzeytcomments.com/sitemap.xml

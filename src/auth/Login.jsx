@@ -24,7 +24,7 @@ export default function Login() {
     setLoading(true);
     const result = await login(form.email, form.password);
     setLoading(false);
-    if (result.success) navigate("/");
+    if (result.success) navigate("/analyze");
     else setError(result.message);
   };
 
@@ -58,7 +58,7 @@ export default function Login() {
             </Stack>
           </form>
 
-          <GoogleSignInButton onAuthenticated={() => navigate("/")} />
+          <GoogleSignInButton onAuthenticated={() => navigate("/analyze")} />
 
           <Typography variant="body2" mt={3} color="text.secondary">
             Don’t have an account? <Link to="/register">Register</Link>
