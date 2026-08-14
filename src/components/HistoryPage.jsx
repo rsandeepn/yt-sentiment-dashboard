@@ -75,7 +75,7 @@ export default function HistoryPage() {
     setError("");
     if (isActiveAnalysis(item)) {
       setCurrentJob(item);
-      navigate("/");
+      navigate("/analyze");
       return;
     }
     if (item.status !== "completed") return;
@@ -83,7 +83,7 @@ export default function HistoryPage() {
       const response = await api.get(`/analyses/${item.id}`);
       setCurrentJob(null);
       setResult(response.data.result);
-      navigate("/");
+      navigate("/analyze");
     } catch (requestError) {
       setError(requestError.response?.data?.detail || "Unable to load this analysis.");
     }
@@ -95,7 +95,7 @@ export default function HistoryPage() {
       const response = await api.post(path);
       setResult(null);
       setCurrentJob(response.data);
-      navigate("/");
+      navigate("/analyze");
     } catch (requestError) {
       setError(requestError.response?.data?.detail || "Unable to start the analysis.");
     }
@@ -129,7 +129,7 @@ export default function HistoryPage() {
           <Typography variant="h2" mt={0.5}>Analysis history</Typography>
           <Typography color="text.secondary" mt={1}>Track progress, reopen reports, or run a fresh analysis.</Typography>
         </Box>
-        <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => navigate("/")}>New analysis</Button>
+        <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => navigate("/analyze")}>New analysis</Button>
       </Stack>
 
       <Paper sx={{ p: { xs: 2, md: 2.5 }, mb: 2.5 }}>

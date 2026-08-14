@@ -51,7 +51,7 @@ export default function SuggestionsPage() {
             Analyze a new video or select a completed report from History.
           </Typography>
           <Stack direction={{ xs: "column", sm: "row" }} justifyContent="center" spacing={1.25}>
-            <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => navigate("/")}>Analyze a video</Button>
+            <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => navigate("/analyze")}>Analyze a video</Button>
             <Button variant="outlined" color="secondary" startIcon={<HistoryRoundedIcon />} onClick={() => navigate("/history")}>Open History</Button>
           </Stack>
         </Paper>

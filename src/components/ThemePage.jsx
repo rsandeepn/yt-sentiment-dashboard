@@ -9,7 +9,7 @@ export default function ThemePage() {
 
   return (
     <Container maxWidth={false} sx={{ maxWidth: 1100, py: { xs: 4, md: 7 } }}>
-      <Button color="secondary" startIcon={<ArrowBackRoundedIcon />} onClick={() => navigate("/")} sx={{ mb: 3 }}>
+      <Button color="secondary" startIcon={<ArrowBackRoundedIcon />} onClick={() => navigate("/analyze")} sx={{ mb: 3 }}>
         Back to report
       </Button>
       <Typography variant="overline" color="primary" fontWeight={750}>Conversation themes</Typography>
@@ -20,7 +20,7 @@ export default function ThemePage() {
         <Paper sx={{ p: 6, textAlign: "center", bgcolor: "#fafaf9" }}>
           <Typography variant="h5">No report is open</Typography>
           <Typography color="text.secondary" mt={1} mb={2}>Analyze a video or open a saved report first.</Typography>
-          <Button variant="contained" onClick={() => navigate("/")}>Analyze a video</Button>
+          <Button variant="contained" onClick={() => navigate("/analyze")}>Analyze a video</Button>
         </Paper>
       ) : (
         <Paper sx={{ p: { xs: 3, md: 5 } }}>

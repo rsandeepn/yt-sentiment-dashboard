@@ -150,7 +150,7 @@ export default function Dashboard() {
             <Button
               variant="contained"
               color="primary"
-              onClick={() => navigate("/explore")}
+              onClick={() => navigate("/analyze")}
             >
               🔍 Explore Comments
             </Button>

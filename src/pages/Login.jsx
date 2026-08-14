@@ -20,7 +20,7 @@ export default function Login() {
       setError(res.message);
       return;
     }
-    window.location.href = "/";
+    window.location.href = "/analyze";
   };
 
   return (
