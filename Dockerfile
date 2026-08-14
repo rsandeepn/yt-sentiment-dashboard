@@ -1,4 +1,4 @@
-FROM node:22-alpine AS build
+FROM --platform=$BUILDPLATFORM node:22-alpine AS build
 
 WORKDIR /app
 
@@ -21,4 +21,4 @@ COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-    CMD ["wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1/health"]
+  CMD wget --quiet --tries=1 --spider http://127.0.0.1/health || exit 1    
