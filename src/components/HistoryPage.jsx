@@ -24,6 +24,7 @@ import api from "../api";
 import { useAnalysis } from "../context/useAnalysis";
 import { historyQuery, isActiveAnalysis } from "../utils/analysisJobs";
 import { downloadJSONReport } from "../utils/reportInsights";
+import { videoDisplayName } from "../utils/videoDisplay";
 
 const STATUS_COLORS = {
   completed: "success",
@@ -102,7 +103,7 @@ export default function HistoryPage() {
   };
 
   const deleteAnalysis = async (item) => {
-    if (!window.confirm(`Delete the analysis for video ${item.video_id}?`)) return;
+    if (!window.confirm(`Delete the analysis for ${videoDisplayName(item)}?`)) return;
     try {
       await api.delete(`/analyses/${item.id}`);
       await loadHistory(false);
@@ -174,7 +175,7 @@ export default function HistoryPage() {
               <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" gap={2}>
                 <Box sx={{ minWidth: 0 }}>
                   <Stack direction="row" alignItems="center" spacing={1} mb={0.5}>
-                    <Typography variant="h6">Video {item.video_id}</Typography>
+                    <Typography variant="h6">{videoDisplayName(item)}</Typography>
                     <Chip
                       size="small"
                       label={item.status}

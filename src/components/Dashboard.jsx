@@ -25,6 +25,7 @@ import ExploreComments from "./ExploreComments";
 import StatsCharts from "./StatsCharts";
 import { analysisJobOutcome, isActiveAnalysis } from "../utils/analysisJobs";
 import { deriveInsights, downloadJSONReport, reportFilename } from "../utils/reportInsights";
+import { videoDisplayName } from "../utils/videoDisplay";
 
 export default function Dashboard() {
   const [url, setUrl] = useState("");
@@ -220,9 +221,9 @@ export default function Dashboard() {
           <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems={{ md: "flex-end" }} spacing={2} mb={3}>
             <Box>
               <Typography variant="overline" color="primary" fontWeight={750}>Analysis report</Typography>
-              <Typography variant="h2" mt={0.5}>Audience insights</Typography>
+              <Typography variant="h2" mt={0.5}>{videoDisplayName(result)}</Typography>
               <Typography color="text.secondary" mt={1}>
-                {result.video?.id ? `Video ${result.video.id} · ` : ""}Generated {new Date().toLocaleString()}
+                Audience insights · Generated {new Date().toLocaleString()}
               </Typography>
             </Box>
             <Stack direction="row" flexWrap="wrap" gap={1}>

@@ -4,6 +4,7 @@ import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
 import TipsAndUpdatesRoundedIcon from "@mui/icons-material/TipsAndUpdatesRounded";
 import { useNavigate } from "react-router-dom";
 import { useAnalysis } from "../context/useAnalysis";
+import { videoDisplayName } from "../utils/videoDisplay";
 import SuggestionCard from "./summary/SuggestionCard";
 
 export default function SuggestionsPage() {
@@ -35,7 +36,7 @@ export default function SuggestionsPage() {
               </Box>
               <Box>
                 <Typography variant="overline" color="text.secondary" sx={{ fontWeight: 700 }}>Current report</Typography>
-                <Typography variant="h5">{result.video?.id ? `Video ${result.video.id}` : "Latest analyzed video"}</Typography>
+                <Typography variant="h5">{videoDisplayName(result)}</Typography>
               </Box>
             </Stack>
           </Paper>
