@@ -52,6 +52,10 @@ export default function Login() {
               onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
 
+            <Typography variant="body2" textAlign="right" mt={-1}>
+              <Link to="/forgot-password">Forgot password?</Link>
+            </Typography>
+
             <Button type="submit" variant="contained" fullWidth disabled={loading} size="large">
               {loading ? "Signing in..." : "Sign In"}
             </Button>

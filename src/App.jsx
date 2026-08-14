@@ -3,6 +3,8 @@ import ProtectedRoute from "./auth/ProtectedRoute";
 
 import Login from "./auth/Login";
 import Register from "./auth/Register";
+import ForgotPassword from "./auth/ForgotPassword";
+import ResetPassword from "./auth/ResetPassword";
 import Dashboard from "./components/Dashboard";
 import ThemePage from "./components/ThemePage";
 import ClustersPage from "./components/ClustersPage";
@@ -32,6 +34,8 @@ export default function App() {
 
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

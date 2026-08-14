@@ -10,6 +10,8 @@ const routePaths = new Set(
 const navigationFiles = [
   "../src/auth/Login.jsx",
   "../src/auth/Register.jsx",
+  "../src/auth/ForgotPassword.jsx",
+  "../src/auth/ResetPassword.jsx",
   "../src/auth/ProtectedRoute.jsx",
   "../src/components/ClustersPage.jsx",
   "../src/components/Dashboard.jsx",
