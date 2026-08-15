@@ -10,6 +10,8 @@ import {
 } from "@mui/material";
 import AuthPageShell from "./AuthPageShell";
 import GoogleSignInButton from "./GoogleSignInButton";
+import LegalConsent from "./LegalConsent";
+import { hasAcceptedLegalTerms, saveLegalAcceptance } from "./legalConsentStorage";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -23,12 +25,17 @@ export default function Register() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [acceptedLegal, setAcceptedLegal] = useState(hasAcceptedLegalTerms);
 
   const submit = async (e) => {
     e.preventDefault();
     setError("");
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match.");
+      return;
+    }
+    if (!acceptedLegal) {
+      setError("Please agree to the Terms of Use and Privacy Policy to continue.");
       return;
     }
     setLoading(true);
@@ -40,7 +47,10 @@ export default function Register() {
       confirm_password: form.confirmPassword,
     });
     setLoading(false);
-    if (result.success) navigate("/analyze");
+    if (result.success) {
+      saveLegalAcceptance();
+      navigate("/analyze");
+    }
     else setError(result.message);
   };
 
@@ -105,10 +115,18 @@ export default function Register() {
             <Button type="submit" variant="contained" fullWidth disabled={loading} size="large">
               {loading ? "Creating account..." : "Register"}
             </Button>
+
+            <LegalConsent checked={acceptedLegal} onChange={setAcceptedLegal} />
             </Stack>
           </form>
 
-          <GoogleSignInButton onAuthenticated={() => navigate("/analyze")} />
+          <GoogleSignInButton
+            disabled={!acceptedLegal}
+            onAuthenticated={() => {
+              saveLegalAcceptance();
+              navigate("/analyze");
+            }}
+          />
 
           <Typography variant="body2" mt={3} color="text.secondary">
             Already have an account? <Link to="/login">Login</Link>

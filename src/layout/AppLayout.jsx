@@ -19,6 +19,7 @@ import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import TipsAndUpdatesRoundedIcon from "@mui/icons-material/TipsAndUpdatesRounded";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext";
+import PublicFooterLinks from "../components/PublicFooterLinks";
 
 export function BrandMark({ inverse = false }) {
   return (
@@ -153,9 +154,12 @@ export default function AppLayout({ children }) {
         <Container maxWidth={false} sx={{ maxWidth: 1480, py: 3 }}>
           <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ sm: "center" }} spacing={1}>
             <BrandMark />
-            <Typography variant="caption" color="text.secondary">
-              Independent audience analytics. Not affiliated with YouTube.
-            </Typography>
+            <Stack spacing={0.75} alignItems={{ sm: "flex-end" }}>
+              <PublicFooterLinks />
+              <Typography variant="caption" color="text.secondary">
+                Independent audience analytics. Not affiliated with YouTube.
+              </Typography>
+            </Stack>
           </Stack>
         </Container>
       </Box>

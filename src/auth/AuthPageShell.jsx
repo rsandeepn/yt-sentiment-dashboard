@@ -1,5 +1,6 @@
 import { Box, Paper, Stack, Typography } from "@mui/material";
 import { BrandMark } from "../layout/AppLayout";
+import PublicFooterLinks from "../components/PublicFooterLinks";
 
 export default function AuthPageShell({ eyebrow, title, subtitle, children }) {
   return (
@@ -12,7 +13,10 @@ export default function AuthPageShell({ eyebrow, title, subtitle, children }) {
           <Typography color="text.secondary" lineHeight={1.7} mb={4}>{subtitle}</Typography>
           {children}
         </Box>
-        <Typography variant="caption" color="text.secondary">Independent audience analytics. Not affiliated with YouTube.</Typography>
+        <Stack spacing={1.25}>
+          <PublicFooterLinks />
+          <Typography variant="caption" color="text.secondary">Independent audience analytics. Not affiliated with YouTube.</Typography>
+        </Stack>
       </Box>
 
       <Box sx={{ display: { xs: "none", lg: "flex" }, bgcolor: "#18181b", color: "white", p: 7, alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>

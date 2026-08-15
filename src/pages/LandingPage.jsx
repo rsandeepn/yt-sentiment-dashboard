@@ -13,6 +13,7 @@ import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import TipsAndUpdatesRoundedIcon from "@mui/icons-material/TipsAndUpdatesRounded";
 import { Link as RouterLink } from "react-router-dom";
 import { BrandMark } from "../layout/AppLayout";
+import PublicFooterLinks from "../components/PublicFooterLinks";
 
 const features = [
   {
@@ -234,9 +235,12 @@ export default function LandingPage() {
         <Container maxWidth={false} sx={{ maxWidth: 1240, py: 3 }}>
           <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ sm: "center" }} spacing={1}>
             <BrandMark />
-            <Typography variant="caption" color="text.secondary">
-              Independent audience analytics. Not affiliated with YouTube.
-            </Typography>
+            <Stack spacing={0.75} alignItems={{ sm: "flex-end" }}>
+              <PublicFooterLinks />
+              <Typography variant="caption" color="text.secondary">
+                Independent audience analytics. Not affiliated with YouTube.
+              </Typography>
+            </Stack>
           </Stack>
         </Container>
       </Box>

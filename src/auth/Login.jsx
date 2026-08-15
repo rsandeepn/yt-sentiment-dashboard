@@ -10,6 +10,8 @@ import {
 } from "@mui/material";
 import AuthPageShell from "./AuthPageShell";
 import GoogleSignInButton from "./GoogleSignInButton";
+import LegalConsent from "./LegalConsent";
+import { hasAcceptedLegalTerms, saveLegalAcceptance } from "./legalConsentStorage";
 
 export default function Login() {
   const { login } = useAuth();
@@ -17,14 +19,22 @@ export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [acceptedLegal, setAcceptedLegal] = useState(hasAcceptedLegalTerms);
 
   const submit = async (e) => {
     e.preventDefault();
     setError("");
+    if (!acceptedLegal) {
+      setError("Please agree to the Terms of Use and Privacy Policy to continue.");
+      return;
+    }
     setLoading(true);
     const result = await login(form.email, form.password);
     setLoading(false);
-    if (result.success) navigate("/analyze");
+    if (result.success) {
+      saveLegalAcceptance();
+      navigate("/analyze");
+    }
     else setError(result.message);
   };
 
@@ -59,10 +69,18 @@ export default function Login() {
             <Button type="submit" variant="contained" fullWidth disabled={loading} size="large">
               {loading ? "Signing in..." : "Sign In"}
             </Button>
+
+            <LegalConsent checked={acceptedLegal} onChange={setAcceptedLegal} />
             </Stack>
           </form>
 
-          <GoogleSignInButton onAuthenticated={() => navigate("/analyze")} />
+          <GoogleSignInButton
+            disabled={!acceptedLegal}
+            onAuthenticated={() => {
+              saveLegalAcceptance();
+              navigate("/analyze");
+            }}
+          />
 
           <Typography variant="body2" mt={3} color="text.secondary">
             Don’t have an account? <Link to="/register">Register</Link>

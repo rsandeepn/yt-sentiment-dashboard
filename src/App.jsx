@@ -12,6 +12,7 @@ import HistoryPage from "./components/HistoryPage";
 import SuggestionsPage from "./components/SuggestionsPage";
 import AppLayout from "./layout/AppLayout";
 import LandingPage from "./pages/LandingPage";
+import PublicInfoPage from "./pages/PublicInfoPage";
 
 function ProtectedPage({ children }) {
   return (
@@ -26,6 +27,10 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/about" element={<PublicInfoPage page="about" />} />
+        <Route path="/privacy" element={<PublicInfoPage page="privacy" />} />
+        <Route path="/terms" element={<PublicInfoPage page="terms" />} />
+        <Route path="/contact" element={<PublicInfoPage page="contact" />} />
         <Route path="/analyze" element={<ProtectedPage><Dashboard /></ProtectedPage>} />
         <Route path="/themes" element={<ProtectedPage><ThemePage /></ProtectedPage>} />
         <Route path="/clusters" element={<ProtectedPage><ClustersPage /></ProtectedPage>} />
