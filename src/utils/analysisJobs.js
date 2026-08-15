@@ -4,10 +4,11 @@ export function isActiveAnalysis(job) {
   return Boolean(job && ACTIVE_ANALYSIS_STATUSES.includes(job.status));
 }
 
-export function historyQuery({ search = "", status = "all", page = 1, pageSize = 10 }) {
+export function historyQuery({ search = "", status = "all", platform = "all", page = 1, pageSize = 10 }) {
   return {
     search: search.trim(),
     status,
+    platform,
     page,
     page_size: pageSize,
   };

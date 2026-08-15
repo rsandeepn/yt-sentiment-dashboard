@@ -22,3 +22,21 @@ test("uses the current analysis title", () => {
 test("falls back to the video id for older reports", () => {
   assert.equal(videoDisplayName({ video_id: "bMoQA-IFhks" }), "Video bMoQA-IFhks");
 });
+
+test("uses platform-neutral Instagram content fields", () => {
+  assert.equal(
+    videoDisplayName({
+      platform: "instagram",
+      content_id: "C123example",
+      content_title: "New product Reel",
+    }),
+    "New product Reel",
+  );
+});
+
+test("labels Instagram content when a title is unavailable", () => {
+  assert.equal(
+    videoDisplayName({ platform: "instagram", content_id: "C123example" }),
+    "Instagram content C123example",
+  );
+});

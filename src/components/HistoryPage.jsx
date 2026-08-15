@@ -25,6 +25,7 @@ import { useAnalysis } from "../context/useAnalysis";
 import { historyQuery, isActiveAnalysis } from "../utils/analysisJobs";
 import { downloadJSONReport } from "../utils/reportInsights";
 import { videoDisplayName } from "../utils/videoDisplay";
+import { contentUrl, platformLabel } from "../utils/platforms";
 
 const STATUS_COLORS = {
   completed: "success",
@@ -39,6 +40,7 @@ export default function HistoryPage() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [platformFilter, setPlatformFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const { setResult, setCurrentJob } = useAnalysis();
@@ -48,7 +50,7 @@ export default function HistoryPage() {
     if (showSpinner) setLoading(true);
     try {
       const response = await api.get("/analyses", {
-        params: historyQuery({ search, status: statusFilter, page, pageSize: 10 }),
+        params: historyQuery({ search, status: statusFilter, platform: platformFilter, page, pageSize: 10 }),
       });
       setItems(response.data.items);
       setTotalPages(response.data.total_pages);
@@ -58,7 +60,7 @@ export default function HistoryPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusFilter]);
+  }, [page, platformFilter, search, statusFilter]);
 
   useEffect(() => {
     loadHistory(true);
@@ -138,11 +140,23 @@ export default function HistoryPage() {
           <TextField
             fullWidth
             size="small"
-            placeholder="Search by video ID or URL"
+            placeholder="Search by title, content ID, or URL"
             value={search}
             onChange={(event) => { setSearch(event.target.value); setPage(1); }}
             slotProps={{ input: { startAdornment: <SearchRoundedIcon sx={{ mr: 1, color: "text.secondary" }} /> } }}
           />
+          <TextField
+            select
+            size="small"
+            label="Platform"
+            value={platformFilter}
+            onChange={(event) => { setPlatformFilter(event.target.value); setPage(1); }}
+            sx={{ minWidth: 170 }}
+          >
+            <MenuItem value="all">All platforms</MenuItem>
+            <MenuItem value="youtube">YouTube</MenuItem>
+            <MenuItem value="instagram">Instagram</MenuItem>
+          </TextField>
           <TextField
             select
             size="small"
@@ -176,6 +190,7 @@ export default function HistoryPage() {
                 <Box sx={{ minWidth: 0 }}>
                   <Stack direction="row" alignItems="center" spacing={1} mb={0.5}>
                     <Typography variant="h6">{videoDisplayName(item)}</Typography>
+                    <Chip size="small" variant="outlined" label={platformLabel(item.platform)} />
                     <Chip
                       size="small"
                       label={item.status}
@@ -183,7 +198,7 @@ export default function HistoryPage() {
                     />
                   </Stack>
                   <Typography variant="body2" color="text.secondary" sx={{ overflowWrap: "anywhere" }}>
-                    {item.video_url}
+                    {contentUrl(item)}
                   </Typography>
                   <Typography variant="caption" color="text.secondary" display="block">
                     {new Date(item.created_at).toLocaleString()}

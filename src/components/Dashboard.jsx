@@ -10,6 +10,8 @@ import {
   Paper,
   Stack,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
@@ -18,6 +20,8 @@ import HubRoundedIcon from "@mui/icons-material/HubRounded";
 import InsertChartOutlinedRoundedIcon from "@mui/icons-material/InsertChartOutlinedRounded";
 import LinkRoundedIcon from "@mui/icons-material/LinkRounded";
 import PictureAsPdfRoundedIcon from "@mui/icons-material/PictureAsPdfRounded";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import YouTubeIcon from "@mui/icons-material/YouTube";
 import { useNavigate } from "react-router-dom";
 import { useAnalysis } from "../context/useAnalysis";
 import api from "../api";
@@ -28,6 +32,7 @@ import { deriveInsights, downloadJSONReport, reportFilename } from "../utils/rep
 import { videoDisplayName } from "../utils/videoDisplay";
 
 export default function Dashboard() {
+  const [platform, setPlatform] = useState("youtube");
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [exporting, setExporting] = useState(false);
@@ -63,6 +68,10 @@ export default function Dashboard() {
   }, [analysisIsActive, currentJob?.id, setCurrentJob, setResult]);
 
   const analyzeVideo = async () => {
+    if (platform === "instagram") {
+      setError("Instagram Professional account connections are coming next.");
+      return;
+    }
     if (!url.trim()) {
       setError("Please enter a YouTube URL.");
       return;
@@ -71,7 +80,7 @@ export default function Dashboard() {
     setResult(null);
     setCurrentJob(null);
     try {
-      const response = await api.post("/analyses", { url });
+      const response = await api.post("/analyses", { url, platform });
       const job = response.data;
       if (job.status === "completed") setResult(job.result);
       else setCurrentJob(job);
@@ -83,6 +92,13 @@ export default function Dashboard() {
   const onSubmit = (event) => {
     event.preventDefault();
     analyzeVideo();
+  };
+
+  const changePlatform = (_event, nextPlatform) => {
+    if (!nextPlatform) return;
+    setPlatform(nextPlatform);
+    setUrl("");
+    setError("");
   };
 
   const exportPDF = async () => {
@@ -156,24 +172,61 @@ export default function Dashboard() {
             </Box>
 
             <Paper component="form" onSubmit={onSubmit} sx={{ flex: 1, width: "100%", maxWidth: 620, p: { xs: 2.5, sm: 3.5 }, border: 0, boxShadow: "0 24px 70px rgba(0,0,0,0.32)" }}>
+              <Typography variant="overline" color="text.secondary" fontWeight={750}>
+                Choose a platform
+              </Typography>
+              <ToggleButtonGroup
+                exclusive
+                fullWidth
+                value={platform}
+                onChange={changePlatform}
+                aria-label="Comment platform"
+                sx={{ mt: 0.75, mb: 2.5 }}
+              >
+                <ToggleButton value="youtube" aria-label="YouTube">
+                  <YouTubeIcon sx={{ mr: 1 }} /> YouTube
+                </ToggleButton>
+                <ToggleButton value="instagram" aria-label="Instagram">
+                  <InstagramIcon sx={{ mr: 1 }} /> Instagram
+                </ToggleButton>
+              </ToggleButtonGroup>
+
               <Stack direction="row" alignItems="center" spacing={1} mb={1}>
-                <LinkRoundedIcon color="primary" />
-                <Typography variant="h5" color="text.primary">Analyze a YouTube video</Typography>
+                {platform === "youtube" ? <LinkRoundedIcon color="primary" /> : <InstagramIcon color="primary" />}
+                <Typography variant="h5" color="text.primary">
+                  {platform === "youtube" ? "Analyze a YouTube video" : "Analyze Instagram comments"}
+                </Typography>
               </Stack>
               <Typography variant="body2" color="text.secondary" mb={2.5}>
-                Paste a public video link to create a new audience report.
+                {platform === "youtube"
+                  ? "Paste a public video link to create a new audience report."
+                  : "Instagram analysis will support posts and Reels from a Professional account you connect."}
               </Typography>
+
+              {platform === "instagram" && (
+                <Alert severity="info" sx={{ mb: 2.5 }}>
+                  Instagram Business and Creator account connections are coming next. Public-profile scraping will not be used.
+                </Alert>
+              )}
               <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
                 <TextField
                   fullWidth
-                  aria-label="YouTube video URL"
-                  placeholder="https://youtube.com/watch?v=..."
+                  aria-label={platform === "youtube" ? "YouTube video URL" : "Instagram post or Reel URL"}
+                  placeholder={platform === "youtube" ? "https://youtube.com/watch?v=..." : "Connect Instagram to select a post or Reel"}
                   value={url}
                   onChange={(event) => setUrl(event.target.value)}
-                  disabled={analysisIsActive}
+                  disabled={analysisIsActive || platform === "instagram"}
                 />
-                <Button type="submit" variant="contained" disabled={analysisIsActive} endIcon={!analysisIsActive && <ArrowForwardRoundedIcon />} sx={{ whiteSpace: "nowrap", minWidth: 150 }}>
-                  {analysisIsActive ? <CircularProgress size={22} color="inherit" /> : "Analyze video"}
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={analysisIsActive || platform === "instagram"}
+                  endIcon={!analysisIsActive && platform === "youtube" && <ArrowForwardRoundedIcon />}
+                  sx={{ whiteSpace: "nowrap", minWidth: 150 }}
+                >
+                  {analysisIsActive
+                    ? <CircularProgress size={22} color="inherit" />
+                    : platform === "youtube" ? "Analyze video" : "Coming soon"}
                 </Button>
               </Stack>
 

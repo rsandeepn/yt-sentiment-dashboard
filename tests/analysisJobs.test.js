@@ -16,7 +16,7 @@ test("job outcomes drive polling, results, and failure UI", () => {
 
 test("history query trims search and preserves pagination", () => {
   assert.deepEqual(
-    historyQuery({ search: "  abc123  ", status: "completed", page: 2, pageSize: 10 }),
-    { search: "abc123", status: "completed", page: 2, page_size: 10 },
+    historyQuery({ search: "  abc123  ", status: "completed", platform: "youtube", page: 2, pageSize: 10 }),
+    { search: "abc123", status: "completed", platform: "youtube", page: 2, page_size: 10 },
   );
 });
